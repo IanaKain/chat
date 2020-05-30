@@ -23,4 +23,4 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', routes.index);
 
-server.listen(port, () => { console.log('listening on', port); });
+server.listen(app.get('port'), () => { console.log('listening on', app.get('port')); });
