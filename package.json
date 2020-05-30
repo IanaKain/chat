@@ -9,6 +9,8 @@
     "body-parser": "^1.19.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
+    "dotenv": "^8.2.0",
+    "errorhandler": "^1.5.1",
     "express": "~4.16.1",
     "http": "0.0.1-security",
     "http-errors": "~1.6.3",
@@ -17,7 +19,8 @@
     "path": "^0.12.7",
     "pug": "^2.0.0-beta11",
     "socket.io": "^2.3.0",
-    "stylus": "^0.54.7"
+    "stylus": "^0.54.7",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.3",
