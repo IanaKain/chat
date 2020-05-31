@@ -1,4 +1,38 @@
 extends layout
 
 block content
-    .container-page__login-page LOGIN PAGE IN PROGRESS...
+  .container-page__login-page
+    .container-page__content
+      .container-page__form
+        h1= title
+        form#enter-form(
+          action='/'
+          method='post'
+        )
+          .form-item
+            label(for='name') User name:
+            input#name(
+              required
+              type='text'
+              name='username'
+              placeholder='Enter your name...'
+            )
+          .form-item
+            label(for='email') User email:
+            input#email(
+              required
+              type='email'
+              name='email'
+              placeholder='Enter your email...'
+            )
+          .form-item
+            label(for='room') Select your room:
+            select#room(name='room')
+              option(value='javascript') JavaScript
+              option(value='nodejs') NodeJS
+              option(value='python') Python
+          .form-item.form-button
+            input#submit(
+              type='submit'
+              value='Join Chat'
+            )
