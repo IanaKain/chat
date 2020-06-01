@@ -1,0 +1,64 @@
+extends layout
+
+block content
+  .container-page__chat-page
+    .container-page__content
+      .container-page__chat
+
+        .chat-left-side
+          .chat-header
+            .chat-header__room-name
+              .room-name= room
+              i.fa.fa-comment
+
+          .chat-content
+            .chat-content-inner
+              .chat-sidebar__room-users-title Members in the room:
+              .chat-sidebar__room-users-data
+                include users.pug
+
+          .chat-footer
+            form#chat-invite-form
+              .form-item.chat-invite-form
+                i.fa.fa-user-o
+                input#email(
+                  required
+                  type='email'
+                  name='email'
+                  placeholder='Enter email...'
+                )
+                .form-button-invite
+                  button#send-invite-btn.actions(type='submit')
+                    i.fa.fa-envelope-o
+                  #invite-confirmation
+        .chat-right-side
+          .chat-header
+            .header__user-data= username
+            .status
+            .header__chat-leave-btn
+              button#leave-chat-btn(type='button', onclick='console.log') Leave
+                i.fa.fa-sign-out
+          .chat-content
+            .chat-messages
+              #history-message-block
+                include historyMessage.pug
+              br
+              .divider Today
+              br
+              #chat-message-block
+              #chat-message-isTyping
+
+          .chat-footer
+            form#chat-form
+              .form-item
+                input#message(
+                  required
+                  type='text'
+                  name='message'
+                  placeholder='Enter message...'
+                )
+              .form-item.form-button
+                button#send-message-btn(type='submit')
+                  i.fa.fa-paper-plane
+
+block body_end
