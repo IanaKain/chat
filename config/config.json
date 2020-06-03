@@ -1,0 +1,12 @@
+{
+  "session": {
+    "secret": "keyboard cat",
+    "key": "sid",
+    "cookie": {
+      "path": "/",
+      "httpOnly": true,
+      "maxAge": null,
+      "secure": false
+    }
+  }
+}
