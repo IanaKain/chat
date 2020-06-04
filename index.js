@@ -23,6 +23,7 @@ const io = socketio(server, {
   pingTimeout: 60000
 }); // todo add logger -> winston to options
 
+const db = require('./db/index').collections();
 const chat = io.of('/chat');
 const config = require('./config/config');
 const connectionStr = 'mongodb+srv://owner:zerogravity@mycluster-f7pss.mongodb.net/test?replicaSet=MyCluster-shard-0&authSource=admin&retryWrites=true&w=majority';
@@ -56,7 +57,7 @@ app.get('/', routes.index, async (req, res) => {
 
 app.post('/', async (req, res) => {
   try {
-    const userFound = null; // todo find user in db
+    const userFound = await db.users.findUser(req.body.username);
     if (userFound) {
       const validPassword = await bcrypt.compare(req.body.password, 'userFound.password');
       if (validPassword) {
@@ -90,7 +91,7 @@ app.post('/chat', async (req, res) => {
   if (!reqValuesEmpty) {
     const salt = await bcrypt.genSalt(10);
     const userPwd = await bcrypt.hash(req.body.password, salt);
-    const newUser =  { ...req.body, password: userPwd }; // todo add user to db
+    const newUser =  await db.users.addUser({ ...req.body, password: userPwd });
 
     req.session.user = newUser;
     res.render('chat', { ...newUser, users: [], messages: [] });
@@ -129,9 +130,13 @@ chat.use(function(socket, next) {
 chat.on('connection', async (socket) => {
   const user = socket.handshake.user;
   socket.join(user.room);
+  const usersInRoom = await db.users.findAllUsersInRoom(user.room);
+  const messages = await db.chat.getMessages(user.room, user._id);
 
   socket.on('disconnect', async () => {
     console.log('disconnect', socket.id, user.id);
+    await db.users.removeUser(user.id);
+    const usersInRoom = await db.users.findAllUsersInRoom(user.room);
   });
 });
 
