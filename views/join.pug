@@ -5,10 +5,10 @@ block content
     .container-page__content
       .container-page__form
         .header-block
-          a.link(href='/join') Sign up
+          a.link(href='/login') Log in
           h1= title
-        form#enter-form(
-          action='/login'
+        form#join-form(
+          action='/join'
           method='post'
         )
           .form-item
@@ -40,5 +40,5 @@ block content
           .form-item.form-button
             input#submit(
               type='submit'
-              value='Chat'
+              value='Join'
             )

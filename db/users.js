@@ -8,15 +8,15 @@ class Users extends Client {
     this.membersCollection = 'members';
   }
 
-  addUser = ({ username, email, room }) => {
+  addUser = ({ username, password, room }) => {
     return new Promise(async (resolve, reject) => {
       const client = await this.__getClient();
       const collection = client.db(this.dbName).collection(this.membersCollection);
 
       try {
-        const { insertedCount, insertedId } = await collection.insertOne({ username, email, rooms: [room] });
+        const { insertedCount, insertedId } = await collection.insertOne({ username, password, rooms: [room] });
 
-        resolve({ id: insertedId, username, email, room });
+        resolve({ id: insertedId, username, password, room });
       } catch (error) {
         console.log('Cannot add user', error);
         reject(error);
@@ -99,16 +99,16 @@ class Users extends Client {
     });
   };
 
-  findUser = (email) => {
+  findUser = (username) => {
     return new Promise(async (resolve, reject) => {
       const client = await this.__getClient();
       const collection = client.db(this.dbName).collection(this.membersCollection);
 
       try {
-        const user = await collection.findOne({ email });
+        const user = await collection.findOne({ username });
 
         user
-          ? resolve({ id: user._id, username: user.username, email: user.email, rooms: user.rooms || [] })
+          ? resolve({ id: user._id, username: user.username, password: user.password, rooms: user.rooms || [] })
           : resolve(user);
       } catch (error) {
         console.log('Cannot find user', error);
