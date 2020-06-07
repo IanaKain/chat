@@ -1,6 +1,7 @@
-for item in []
-  div(class=`chat-message-block__message`)
+for item in messages
+  div(class=`chat-message-block__message ${item.owner ? 'owner': 'peer'}`)
     .message__user-info
-      .message__user-name= item
-      .message__date= item
-    .message__user-content= item
+      .message__user-name= item.username
+      .message__date= item.time
+    .message__user-content= item.text
+

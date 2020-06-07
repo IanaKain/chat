@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const cookie = require('cookie');
 const express = require('express');
 const errorhandler = require('errorhandler');
@@ -28,6 +27,10 @@ const chat = io.of('/chat');
 const config = require('./config/config');
 const connectionStr = 'mongodb+srv://owner:zerogravity@mycluster-f7pss.mongodb.net/test?replicaSet=MyCluster-shard-0&authSource=admin&retryWrites=true&w=majority';
 const sessionStore = new MongoStore({ url: connectionStr });
+const communicator = require('./utils/communication').createCommunication(app, chat);
+const communicate = communicator();
+const formatMessage = require('./utils/messages');
+const sendInvite = require('./utils/mail');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -49,56 +52,31 @@ app.use(session({
   store: sessionStore,
 }));
 
-app.get('/', routes.index, async (req, res) => {
-  req.session.user
-    ? res.redirect(307, 'chat') // TODO res.locals.user
-    : res.render('index', { title: 'Welcome to the Node Chatroom', error: null });
-});
-
-app.post('/', async (req, res) => {
-  try {
-    const userFound = await db.users.findUser(req.body.username);
-    if (userFound) {
-      const validPassword = await bcrypt.compare(req.body.password, 'userFound.password');
-      if (validPassword) {
-        req.session.user = userFound;
-        res.redirect(307, 'chat');
-      } else {
-        res.render('index', { title: 'Welcome to the Node Chatroom', user: userFound, error: 'Error: Incorrect password.' })
-      }
-    }
-    res.redirect(307, 'chat');
-  } catch (error) {
-    console.log('ERROR in path /chat', error);
-    res.status(500).end();
-  }
-});
-
-app.get('/chat', async (req, res) => {
-  req.session.user
-    ? res.render('chat', { ...req.session.user, users: [], messages: [] })
-    : res.redirect(307, '/');
-});
-
-app.post('/chat', async (req, res) => {
-  if (req.session.user) {
-    res.render('chat', { ...req.session.user, users: [], messages: [] })
-  }
-
-  const reqValues = Object.values(req.body);
-  const reqValuesEmpty = !reqValues.length || reqValues.some(v => !v);
-
-  if (!reqValuesEmpty) {
-    const salt = await bcrypt.genSalt(10);
-    const userPwd = await bcrypt.hash(req.body.password, salt);
-    const newUser =  await db.users.addUser({ ...req.body, password: userPwd });
-
-    req.session.user = newUser;
-    res.render('chat', { ...newUser, users: [], messages: [] });
+app.use((req, res, next) => {
+  if (req.session && req.session.user) {
+    app.locals.username = req.session.user.username;
+    next();
+  } else if (!app.locals.username && req.body.username) {
+    app.locals.username = req.body.username;
+    next();
+  } else if (!app.locals.username) {
+    app.locals.username = null;
+    next();
   } else {
-    res.redirect('/');
+    next();
   }
 });
+
+app.get(config.routes.main, routes.redirect);
+
+app.get(config.routes.join, routes.joinIndex);
+app.post(config.routes.join, routes.join);
+
+app.get(config.routes.login, routes.loginIndex);
+app.post(config.routes.login, routes.login);
+
+app.get(config.routes.chat, routes.chatIndex);
+app.get(config.routes.logout, routes.logout);
 
 app.use((req, res) => {
   res.status(404).send('Sorry, page not found');
@@ -120,23 +98,55 @@ chat.use(function(socket, next) {
 
   sessionStore.load(sidCookie, (err, session) => {
     if (err) { next(new Error('not authorized')); }
-    if (!session || !session.user) { next(new Error('not authorized')); }
-
-    socket.handshake.user = session.user;
-    next();
+    if (!session || !session.user) {
+      next(new Error('not authorized'));
+    } else {
+      socket.handshake.user = session.user;
+      next();
+    }
   });
 });
 
 chat.on('connection', async (socket) => {
   const user = socket.handshake.user;
+  console.log('a user connected', socket.id, user);
+
+  communicate.setUser(user);
+  communicate.setSocket(socket);
   socket.join(user.room);
+
   const usersInRoom = await db.users.findAllUsersInRoom(user.room);
   const messages = await db.chat.getMessages(user.room, user._id);
 
+  communicate.sendHistory(messages);
+  communicate.sendWelcomeMsg();
+  communicate.informUserConnected();
+  communicate.sendUsersList(usersInRoom);
+
+  socket.on('typing:start', () => { communicate.toggleUserIsTyping(true); });
+  socket.on('typing:end', () => { communicate.toAllTemp('typing:end'); });
+
+  socket.on('message:send', (msg, cb) => {
+    db.chat.addMessage(formatMessage(msg, user).peer())
+      .then(() => communicate.sendMessage(msg))
+      .then(() => cb(msg))
+      .catch((error) => console.warn(error.message));
+  });
+
+  socket.on('email:send', (receivers) => {
+    sendInvite({ from: user.username, to: receivers })
+      .then(() => communicate.sendInviteConfirmation())
+      .catch(error => communicate.toSender('email:result', error.message));
+  });
+
   socket.on('disconnect', async () => {
     console.log('disconnect', socket.id, user.id);
-    await db.users.removeUser(user.id);
+    communicate.informUserDisconnected();
     const usersInRoom = await db.users.findAllUsersInRoom(user.room);
+    // console.log('usersInRoom', usersInRoom);
+    communicate.sendUsersList(usersInRoom);
+
+    app.locals.username = null;
   });
 });
 

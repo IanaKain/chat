@@ -8,5 +8,17 @@
       "maxAge": null,
       "secure": false
     }
+  },
+  "routes": {
+    "main": "/",
+    "join": "/join",
+    "login": "/login",
+    "chat": "/chat",
+    "logout": "/logout"
+  },
+  "templates": {
+    "login": "index",
+    "join": "join",
+    "chat": "chat"
   }
 }

@@ -36,7 +36,7 @@ block content
             .header__user-data= username
             .status
             .header__chat-leave-btn
-              button#leave-chat-btn(type='button', onclick='console.log') Leave
+              button#leave-chat-btn(type='button', onclick='disconnect()') Leave
                 i.fa.fa-sign-out
           .chat-content
             .chat-messages
@@ -62,3 +62,7 @@ block content
                   i.fa.fa-paper-plane
 
 block body_end
+  script
+    include ../public/js/index.js
+  script
+    | connect();
