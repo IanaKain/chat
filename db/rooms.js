@@ -1,56 +1,45 @@
-const Client = require('./client');
+const { client } = require('./client');
+const logger = require('../utils/logger')(module);
 
-class Rooms extends Client {
+class Rooms {
   constructor() {
-    super();
-    this.dbName = 'rooms';
+    this.collectionName = 'rooms';
   }
 
-  findRoom = (room) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(room);
+  findRoom = async (room) => {
+    const collection = client.db().createCollection(this.collectionName);
 
-      try {
-        const roomCount = await collection.find({ room }).count();
+    try {
+      const roomCount = await collection.find({ room }).count();
 
-        if (roomCount) {
-          resolve(roomCount);
-        } else {
-          this.addRoom(room);
-          console.log('Room added to DB');
-          resolve(1);
-        }
-      } catch (error) {
-        console.log('Cannot find room', error);
-        reject(error);
-      } finally {
-        await client.close();
+      if (roomCount) {
+        return roomCount;
+      } else {
+        this.addRoom(room);
+        return 1;
       }
-    });
+    } catch (error) {
+      logger.warn(`Cannot find room. ${error.message}`);
+      throw error;
+    }
   };
 
-  addRoom = (room) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(room);
+  addRoom = async (room) => {
+    const collection = client.db().collection(room);
 
-      try {
-        const result = await collection.insertOne({ room });
+    try {
+      const result = await collection.insertOne({ room });
 
-        resolve(room);
-      } catch (error) {
-        console.log('Cannot add room', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+      logger.info(`Room ${room} added to DB. ${Object.keys(result)}`);
+      return room;
+    } catch (error) {
+      logger.warn(`Cannot add room. ${error.message}`);
+      throw error;
+    }
   };
 
   clearCollection = async () => {
-    const client = await this.__getClient();
-    client.db(this.dbName).dropDatabase();
+    await client.db().dropDatabase();
   };
 }
 

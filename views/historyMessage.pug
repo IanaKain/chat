@@ -1,4 +1,4 @@
-for item in messages
+for item in messages || []
   div(class=`chat-message-block__message ${item.owner ? 'owner': 'peer'}`)
     .message__user-info
       .message__user-name= item.username
