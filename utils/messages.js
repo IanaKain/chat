@@ -14,7 +14,7 @@ const adminMessage = (msg) => ({
 
 const peerMessage = (msg, user) => ({
   role: PEER,
-  userId: user._id,
+  userId: user.userId,
   username: user.username,
   room: user.currentRoom,
   text: msg,

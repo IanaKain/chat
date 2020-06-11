@@ -55,3 +55,4 @@ jspm_packages/
 .env.test
 
 .idea/
+.DS_Store

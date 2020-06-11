@@ -10,6 +10,8 @@ class Chat {
     const collection = client.db().collection(this.collectionName);
     const includeFields = { userId: 1, username: 1, text: 1, time: 1 };
     const addField = { owner: { $cond: { if: { $eq: [ '$userId', userId ] }, then: true, else: false } } };
+    const a = await collection.find({}).toArray();
+    console.log('a', a);
 
     try {
       const results = await collection.aggregate([
