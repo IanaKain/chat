@@ -13,6 +13,7 @@ const MongoStore = require('connect-mongo')(session);
 const routes = require('./routes');
 const dotenv = require('dotenv').config();
 const {client} = require('./db/client');
+const { ServerError } = require('./utils/error');
 
 client.connect().then(() => {
   logger.info('Connected to DB.');
@@ -33,6 +34,7 @@ const io = socketio(server, {
 const db = require('./db/index').collections();
 const chat = io.of('/chat');
 const config = require('./config/config');
+const socketEvents = require('./config/socketEvents');
 const connectionStr = 'mongodb+srv://owner:zerogravity@mycluster-f7pss.mongodb.net/test?replicaSet=MyCluster-shard-0&authSource=admin&retryWrites=true&w=majority';
 const sessionStore = new MongoStore({ url: connectionStr });
 const communicator = require('./utils/communication').createCommunication(app, chat);
@@ -104,10 +106,10 @@ chat.use(function(socket, next) {
   const handshakeCookie = cookie.parse(handshakeData.headers.cookie || '');
   const sidCookie = cookieParser.signedCookie(handshakeCookie[config.session.key], config.session.secret);
 
-  sessionStore.load(sidCookie, (err, session) => {
-    if (err) { next(new Error('not authorized')); }
+  sessionStore.load(sidCookie, (error, session) => {
+    if (error) { next(new ServerError(error, 'User is not authorized.')); }
     if (!session || !session.user) {
-      next(new Error('not authorized'));
+      next(new ServerError(error, 'User is not authorized.'));
     } else {
       socket.handshake.user = session.user;
       next();
@@ -115,7 +117,7 @@ chat.use(function(socket, next) {
   });
 });
 
-chat.on('connection', async (socket) => {
+chat.on(socketEvents.connection, async (socket) => {
   const user = socket.handshake.user;
 
   communicate.setUser(user);
@@ -130,24 +132,24 @@ chat.on('connection', async (socket) => {
   communicate.informUserConnected();
   communicate.sendUsersList(usersInRoom);
 
-  socket.on('typing:start', () => { communicate.toggleUserIsTyping(true); });
-  socket.on('typing:end', () => { communicate.toAllTemp('typing:end'); });
+  socket.on(socketEvents.typeStart, () => { communicate.toggleUserIsTyping(true); });
+  socket.on(socketEvents.typeEnd, () => { communicate.toAllTemp(socketEvents.typeEnd); });
 
-  socket.on('message:send', (msg, cb) => {
+  socket.on(socketEvents.sendMessage, (msg, cb) => {
     db.chat.addMessage(formatMessage(msg, user).peer())
       .then(() => communicate.sendMessage(msg))
       .then(() => cb(msg))
       .catch((error) => console.warn(error.message));
   });
 
-  socket.on('email:send', (receivers) => {
-    sendInvite({ from: user.username, to: receivers })
+  socket.on(socketEvents.sendInvite, (receivers) => {
+    sendInvite({ from: user.username, to: receivers, link: socket.handshake.headers.origin })
       .then(() => communicate.sendInviteConfirmation())
-      .catch(error => communicate.toSender('email:result', error.message));
+      .catch(error => communicate.toSender(socketEvents.sendInviteResult, error.message));
   });
 
-  socket.on('disconnect', async () => {
-    console.log('disconnect', socket.id, user.userId);
+  socket.on(socketEvents.disconnect, async () => {
+    logger.info(`User ${user.username} disconnected`);
     communicate.informUserDisconnected();
     const usersInRoom = await db.users.findAllUsersInRoom(user.currentRoom);
     communicate.sendUsersList(usersInRoom);

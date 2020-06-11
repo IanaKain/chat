@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const db = require('../db/index').collections();
 const config = require('../config/config');
+const { ServerError } = require('../utils/error');
 
 const formTitle = { title: 'Welcome to chatroom', user: null, error: null };
 const errors = {
@@ -30,10 +31,10 @@ const findAndAuthorize = async (fromData) => {
     if (isAuthorized) {
       return { ...fromData, ...userFound };
     } else {
-      throw new Error(errors.wrongPassword);
+      throw new ServerError({ message: errors.wrongPassword });
     }
   }
-  throw new Error(errors.userNotFound);
+  throw new ServerError({ message: errors.userNotFound });
 };
 
 const goToChat = (req, res, user) => {
@@ -56,7 +57,7 @@ exports.loginIndex = async (req, res, next) => {
       ? goToChat(req, res)
       : res.render(config.templates.login, formTitle);
   } catch (error) {
-    next(error);
+    next(new ServerError(error));
   }
 };
 
@@ -66,10 +67,12 @@ exports.login = async (req, res, next) => {
     const userFound = await findAndAuthorize(req.body);
 
     if (userFound) {
-      if (userFound.currentRoom !== req.body.currentRoom) {
+      if (!userFound.currentRoom || userFound.currentRoom !== req.body.currentRoom) {
         await db.users.addRoomToUser(userFound, req.body.currentRoom);
+        goToChat(req, res, { ...userFound, currentRoom: req.body.currentRoom });
+      } else {
+        goToChat(req, res, userFound);
       }
-      goToChat(req, res, userFound);
     }
   } catch (error) {
     if (error.message === errors.wrongPassword) {
@@ -78,7 +81,7 @@ exports.login = async (req, res, next) => {
     if (error.message === errors.userNotFound) {
       return res.redirect(config.routes.join);
     }
-    next(error);
+    next(new ServerError(error));
   }
 };
 
@@ -88,7 +91,7 @@ exports.chatIndex = (req, res, next) => {
       ? res.render(config.templates.chat)
       : res.redirect(config.routes.login);
   } catch (error) {
-    next(error);
+    next(new ServerError(error));
   }
 };
 
@@ -98,7 +101,7 @@ exports.joinIndex = (req, res, next) => {
       ? goToChat(req, res)
       : res.render(config.templates.join, formTitle)
   } catch (error) {
-    next(error);
+    next(new ServerError(error));
   }
 };
 
@@ -117,7 +120,7 @@ exports.join = async (req, res, next) => {
       goToChat(req, res, newUser);
     }
   } catch (error) {
-    next(error);
+    next(new ServerError(error));
   }
 };
 
@@ -131,12 +134,12 @@ exports.logout = async (req, res, next) => {
           res.clearCookie('sid', { path: '/' });
           res.redirect(config.routes.login);
         } else {
-          next(error);
+          next(new ServerError(error));
         }
       })
     }
   } catch (error) {
-    next(error);
+    next(new ServerError(error));
   }
 };
 
