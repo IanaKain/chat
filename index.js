@@ -12,6 +12,14 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const routes = require('./routes');
 const dotenv = require('dotenv').config();
+const {client} = require('./db/client');
+
+client.connect().then(() => {
+  logger.info('Connected to DB.');
+}).catch((error) => {
+  logger.error('Error while connect to DB.', error.message, error.reason);
+});
+
 if (dotenv.error) { throw dotenv.error }
 
 const app = express();
@@ -87,7 +95,7 @@ app.use((err, req, res, next) => {
     const errorHandler = errorhandler();
     errorHandler(err, req, res, next);
   } else {
-    res.status(500);
+    res.status(500).end();
   }
 });
 
@@ -109,14 +117,13 @@ chat.use(function(socket, next) {
 
 chat.on('connection', async (socket) => {
   const user = socket.handshake.user;
-  console.log('a user connected', socket.id, user);
 
   communicate.setUser(user);
   communicate.setSocket(socket);
-  socket.join(user.room);
+  socket.join(user.currentRoom);
 
-  const usersInRoom = await db.users.findAllUsersInRoom(user.room);
-  const messages = await db.chat.getMessages(user.room, user._id);
+  const usersInRoom = await db.users.findAllUsersInRoom(user.currentRoom);
+  const messages = await db.chat.getMessages(user.currentRoom, user.userId);
 
   communicate.sendHistory(messages);
   communicate.sendWelcomeMsg();
@@ -140,10 +147,9 @@ chat.on('connection', async (socket) => {
   });
 
   socket.on('disconnect', async () => {
-    console.log('disconnect', socket.id, user.id);
+    console.log('disconnect', socket.id, user.userId);
     communicate.informUserDisconnected();
-    const usersInRoom = await db.users.findAllUsersInRoom(user.room);
-    // console.log('usersInRoom', usersInRoom);
+    const usersInRoom = await db.users.findAllUsersInRoom(user.currentRoom);
     communicate.sendUsersList(usersInRoom);
 
     app.locals.username = null;

@@ -5,7 +5,7 @@ class ServerCommunication {
     this.io = io;
     this.server = app;
     this.socket = null;
-    this.room = null;
+    this.currentRoom = null;
     this.user = null;
   }
 
@@ -15,11 +15,11 @@ class ServerCommunication {
 
   setUser = (user) => {
     this.user = user;
-    this.setRoom(user.room);
+    this.setRoom(user.currentRoom);
   };
 
-  setRoom = (room) => {
-    this.room = room;
+  setRoom = (currentRoom) => {
+    this.currentRoom = currentRoom;
   };
 
   get toAll() {
@@ -35,11 +35,11 @@ class ServerCommunication {
   };
 
   get toAllInRoom() {
-    return this.io.in(this.room).emit.bind(this.io);
+    return this.io.in(this.currentRoom).emit.bind(this.io);
   };
 
   get toAllInRoomExceptSender() {
-    return this.socket.to(this.room).emit.bind(this.socket);
+    return this.socket.to(this.currentRoom).emit.bind(this.socket);
   };
 
   get toAllTemp() {

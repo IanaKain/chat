@@ -6,6 +6,7 @@ const PEER = 'peer';
 
 const adminMessage = (msg) => ({
   role: ADMIN,
+  userId: ADMIN,
   username: ADMIN,
   text: msg,
   time: moment().calendar(),
@@ -13,9 +14,9 @@ const adminMessage = (msg) => ({
 
 const peerMessage = (msg, user) => ({
   role: PEER,
-  userId: user.id,
+  userId: user._id,
   username: user.username,
-  room: user.room,
+  room: user.currentRoom,
   text: msg,
   time: moment().calendar(),
 });

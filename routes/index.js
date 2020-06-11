@@ -6,10 +6,11 @@ const formTitle = { title: 'Welcome to chatroom', user: null, error: null };
 const errors = {
   wrongPassword: 'Error: Incorrect password.',
   userExists: 'Error: User already exists.',
+  userNotFound: 'Error: User already exists.',
+  serverError: 'Error: Something went wrong.',
 };
 
 const isUserAuthorized = async (user, password) => {
-  console.log(user, password);
   const validPassword = await bcrypt.compare(password, user.password);
   return !!validPassword;
 };
@@ -19,6 +20,20 @@ const securePassword = async (password) => {
   const userPwd = await bcrypt.hash(password, salt);
 
   return userPwd;
+};
+
+const findAndAuthorize = async (fromData) => {
+  const userFound = await db.users.findUser(fromData.username);
+
+  if (userFound) {
+    const isAuthorized = await isUserAuthorized(userFound, fromData.password);
+    if (isAuthorized) {
+      return { ...fromData, ...userFound };
+    } else {
+      throw new Error(errors.wrongPassword);
+    }
+  }
+  throw new Error(errors.userNotFound);
 };
 
 const goToChat = (req, res, user) => {
@@ -33,46 +48,61 @@ const goToChat = (req, res, user) => {
   }
 };
 
-exports.loginIndex = async (req, res) => {
-  // await db.users.clearCollection();
-  // await db.chat.clearCollection();
-  req.session.user
-    ? goToChat(req, res)
-    : res.render(config.templates.login, formTitle);
-};
-
-exports.login = async (req, res) => {
+exports.loginIndex = async (req, res, next) => {
   try {
-    if (req.session.user) { return goToChat(req, res); }
-
-    const userFound = await db.users.findUser(req.body.username);
-
-    if (userFound) {
-      await isUserAuthorized(userFound, req.body.password)
-        ? goToChat(req, res, userFound)
-        : res.render(config.templates.login, { ...formTitle, user: userFound, error: errors.wrongPassword });
-    } else {
-      res.redirect(config.routes.join);
-    }
+    // await db.users.clearCollection();
+    // await db.chat.clearCollection();
+    req.session.user
+      ? goToChat(req, res)
+      : res.render(config.templates.login, formTitle);
   } catch (error) {
-    console.log('ERROR in path /login', error);
-    res.status(500).end();
+    next(error);
   }
 };
 
-exports.chatIndex = (req, res) => {
-  req.session.user
-    ? res.render(config.templates.chat)
-    : res.redirect(config.routes.login);
+exports.login = async (req, res, next) => {
+  try {
+    if (req.session.user) { return goToChat(req, res); }
+    const userFound = await findAndAuthorize(req.body);
+
+    if (userFound) {
+      if (userFound.currentRoom !== req.body.currentRoom) {
+        await db.users.addRoomToUser(userFound, req.body.currentRoom);
+      }
+      goToChat(req, res, userFound);
+    }
+  } catch (error) {
+    if (error.message === errors.wrongPassword) {
+      return res.render(config.templates.login, { ...formTitle, user: null, error: errors.wrongPassword });
+    }
+    if (error.message === errors.userNotFound) {
+      return res.redirect(config.routes.join);
+    }
+    next(error);
+  }
 };
 
-exports.joinIndex = function(req, res){
-  req.session.user
-    ? goToChat(req, res)
-    : res.render(config.templates.join, formTitle)
+exports.chatIndex = (req, res, next) => {
+  try {
+    req.session.user
+      ? res.render(config.templates.chat)
+      : res.redirect(config.routes.login);
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.join = async (req, res) => {
+exports.joinIndex = (req, res, next) => {
+  try {
+    req.session.user
+      ? goToChat(req, res)
+      : res.render(config.templates.join, formTitle)
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.join = async (req, res, next) => {
   try {
     if (req.session.user) { return goToChat(req, res); }
 
@@ -81,26 +111,32 @@ exports.join = async (req, res) => {
     if (userFound) {
       res.render(config.templates.join, { ...formTitle, user: userFound, error: errors.userExists })
     } else {
-      const newUser = await db.users.addUser({ ...req.body, password: await securePassword(req.body.password) });
+      const userToAdd = { ...req.body, password: await securePassword(req.body.password) };
+      const newUser = await db.users.addUser(userToAdd);
 
-      goToChat(req, res, newUser); // todo default room or room the user last visited?
+      goToChat(req, res, newUser);
     }
   } catch (error) {
-    console.log('ERROR in path /chat', error);
-    res.status(500).end();
+    next(error);
   }
 };
 
-exports.logout = (req, res, next) => {
-  if (req.session) {
-    req.session.destroy((error) => {
-      if (!error) {
-        res.clearCookie('sid', { path: '/' });
-        res.redirect(config.routes.login);
-      } else {
-        next(error);
-      }
-    })
+exports.logout = async (req, res, next) => {
+  try {
+    const isCurrentRoomRemoved = await db.users.removeRoomFromUser(req.session.user);
+    console.log(2, isCurrentRoomRemoved.value);
+    if (req.session) {
+      req.session.destroy((error) => {
+        if (!error) {
+          res.clearCookie('sid', { path: '/' });
+          res.redirect(config.routes.login);
+        } else {
+          next(error);
+        }
+      })
+    }
+  } catch (error) {
+    next(error);
   }
 };
 

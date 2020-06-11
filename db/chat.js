@@ -1,57 +1,45 @@
-const Client = require('./client');
+const { client } = require('./client');
+const logger = require('../utils/logger')(module);
 
-class Chat extends Client {
+class Chat {
   constructor() {
-    super();
-    this.dbName = 'chat';
-    this.messagesCollection = 'messages';
+    this.collectionName = 'messages';
   }
 
-  getMessages = (room, userId) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.messagesCollection);
-      const includeFields = { userId: 1, username: 1, text: 1, time: 1 };
-      const addField = { owner: { $cond: { if: { $eq: [ '$_id', userId ] }, then: true, else: false } } };
+  getMessages = async (currentRoom, userId) => {
+    const collection = client.db().collection(this.collectionName);
+    const includeFields = { userId: 1, username: 1, text: 1, time: 1 };
+    const addField = { owner: { $cond: { if: { $eq: [ '$userId', userId ] }, then: true, else: false } } };
 
-      try {
-        const results = await collection.aggregate([
-          { $match: { room } },
-          { $project: { ...includeFields, ...addField } }
-        ]).toArray();
+    try {
+      const results = await collection.aggregate([
+        { $match: { room: currentRoom } },
+        { $project: { ...includeFields, ...addField } }
+      ]).toArray();
 
-        resolve(results);
-      } catch (error) {
-        console.log('Cannot get messages', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+      return results;
+    } catch (error) {
+      logger.warn(`Connected to DB. ${error.message}`);
+      throw error;
+    }
   };
 
-  addMessage = (data) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.messagesCollection);
+  addMessage = async (data) => {
+    const collection = client.db().collection(this.collectionName);
 
-      try {
-        const result = await collection.insertOne(data);
+    try {
+      const result = await collection.insertOne(data);
 
-        console.log('chat message inserted into db: ' + Object.keys(result));
-        resolve(data);
-      } catch (error) {
-        console.log('Cannot add message', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+      logger.info(`Message inserted into db. ${Object.keys(result)}`);
+      return data;
+    } catch (error) {
+      logger.warn(`Cannot add message. ${error.message}`);
+      throw error;
+    }
   };
 
   clearCollection = async () => {
-    const client = await this.__getClient();
-    client.db(this.dbName).dropDatabase();
+    await client.db().dropDatabase();
   };
 }
 

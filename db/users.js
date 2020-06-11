@@ -1,165 +1,148 @@
 const { ObjectID } = require('mongodb');
-const Client = require('./client');
+const { client } = require('../db/client');
+const { schema } = require('./schema/index');
+const { ServerError } = require('../utils/error');
+const logger = require('../utils/logger')(module);
 
-class Users extends Client {
+class Users {
   constructor() {
-    super();
-    this.dbName = 'users';
-    this.membersCollection = 'members';
+    this.collectionName = 'users';
+    this.schemaValidator = {
+      validator: { $jsonSchema: schema.user }
+    }
   }
 
-  addUser = ({ username, password, room }) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  addUser = async (user) => {
+    const collection = await client.db().createCollection(this.collectionName, this.schemaValidator);
 
-      try {
-        const { insertedCount, insertedId } = await collection.insertOne({ username, password, rooms: [room] });
-
-        resolve({ id: insertedId, username, password, room });
-      } catch (error) {
-        console.log('Cannot add user', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+    try {
+      const { insertedId } = await collection.insertOne({
+        ...user, rooms: [user.currentRoom]
+      });
+      return { ...user, userId: insertedId };
+    } catch (error) {
+      logger.warn(`Cannot add user. ${error.message}`);
+      throw new ServerError(error, 'Cannot add user');
+    }
   };
 
-  removeUser = (id) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  removeUser = async (userId) => {
+    const collection = client.db().collection(this.collectionName);
 
-      try {
-        const { deletedCount } = await collection.deleteOne({ _id: ObjectID(id) });
+    try {
+      const { deletedCount } = await collection.deleteOne({ _id: ObjectID(userId) });
 
-        deletedCount && console.log('USER REMOVED ', id);
-        resolve(deletedCount === 1);
-      } catch (error) {
-        console.log('Cannot remove user', error);
-        reject(error);
-      } finally {
-        await client.close();
+      if (deletedCount === 1) {
+        logger.info(`User ${userId} removed from DBs.`);
       }
-    });
+      return deletedCount === 1;
+    } catch (error) {
+      logger.warn(`Cannot remove user. ${error.message}`);
+      throw new ServerError(error, 'Cannot remove user');
+    }
   };
 
-  findAllUsersInRoom = (room) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  findAllUsersInRoom = async (currentRoom) => {
+    const collection = client.db().collection(this.collectionName);
 
-      try {
-        const results = await collection.find({ rooms: room }).toArray();
-
-        resolve(results);
-      } catch (error) {
-        console.log('Cannot find users in room', error);
-        reject(error);
-      } finally {
-        await client.close();
+    try {
+      if (currentRoom) {
+        const results = await collection.find({ currentRoom }).toArray();
+        return results;
+      } else {
+        logger.warn('Room name is not provided.');
+        throw new ServerError({ message: 'Room name is not provided.' });
       }
-    });
+    } catch (error) {
+      logger.warn(`Cannot find users in room. ${error.message}`);
+      throw new ServerError(error, 'Cannot find users in room');
+    }
   };
 
-  getAllUsers = () => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  getAllUsers = async () => {
+    const collection = client.db().collection(this.collectionName);
 
-      try {
-        const results = await collection.find().toArray();
+    try {
+      const results = await collection.find().toArray();
 
-        resolve(results);
-      } catch (error) {
-        console.log('Cannot get users', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+      return results;
+    } catch (error) {
+      logger.warn(`Cannot get users. ${error.message}`);
+      return new ServerError(error, 'Cannot get users');
+    }
   };
 
-  countUsers = (username) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  countUsers = async (username) => {
+    try {
+      const count = await collection.find({ username }).count();
 
-      try {
-        const count = await collection.find({ username }).count();
-
-        resolve(count);
-      } catch (error) {
-        console.log('Cannot count users', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+      return count;
+    } catch (error) {
+      logger.warn(`Cannot count users. ${error.message}`);
+      throw new ServerError(error, 'Cannot count users');
+    }
   };
 
-  findUser = (username) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  findUser = async (username) => {
+    const collection = client.db().collection(this.collectionName);
 
-      try {
-        const user = await collection.findOne({ username });
-
-        user
-          ? resolve({ id: user._id, username: user.username, password: user.password, rooms: user.rooms || [] })
-          : resolve(user);
-      } catch (error) {
-        console.log('Cannot find user', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+    try {
+      const user = await collection.findOne({ username });
+      return user
+        ? ({
+          userId: user._id,
+          username: user.username,
+          password: user.password,
+          currentRoom: user.currentRoom,
+          rooms: user.rooms || []
+        })
+        : user;
+    } catch (error) {
+      logger.warn(`Cannot find user. ${error.message}`);
+      throw new ServerError(error, 'Cannot find user');
+    }
   };
 
-  addRoomToUser = (user, room) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  addRoomToUser = async (user, currentRoom) => {
+    const collection = client.db().collection(this.collectionName);
 
-      try {
-        const result = await collection.findOneAndUpdate({ _id: user.id }, { $set: { rooms: [room] } })
-
-        console.log('Room added to the user', result.value);
-        resolve(!!result.value);
-      } catch (error) {
-        console.log('Cannot add room to the user', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+    try {
+      const result = await collection.findOneAndUpdate({ _id: ObjectID(user.userId) }, { $set: { currentRoom } });
+      return result;
+    } catch (error) {
+      logger.warn(`Cannot add room to the user. ${error.message}`);
+      throw new ServerError(new ServerError(error, 'Cannot add room to the user'));
+    }
   };
 
-  addRoomToUserRooms = (user, room) => {
-    return new Promise(async (resolve, reject) => {
-      const client = await this.__getClient();
-      const collection = client.db(this.dbName).collection(this.membersCollection);
+  removeRoomFromUser = async (user) => {
+    const collection = client.db().collection(this.collectionName);
 
-      try {
-        const result = await collection.findOneAndUpdate({ _id: user.id }, { $addToSet: { rooms: room } });
+    try {
+      const result = await collection.updateOne({ username: user.username }, { $unset: { currentRoom: 1 } });
+      return result;
+    } catch (error) {
+      logger.warn(`Cannot remove room from the user. ${error.message}`);
+      throw new ServerError(new ServerError(error, 'Cannot remove room from the user'));
+    }
+  };
 
-        console.log('Room added to the user', result.value);
-        resolve(!!result.value);
-      } catch (error) {
-        console.log('Cannot add room to the user', error);
-        reject(error);
-      } finally {
-        await client.close();
-      }
-    });
+  addRoomToUserRooms = async (user, currentRoom) => {
+    const collection = client.db().collection(this.collectionName);
+
+    try {
+      const result = await collection.findOneAndUpdate({ _id: user.userId }, { $addToSet: { rooms: currentRoom } });
+
+      logger.info(`Room ${currentRoom} added to the user rooms. ${Object.keys(result)}`);
+      return !!result.value;
+    } catch (error) {
+      logger.warn(`Cannot add room to the user room list. ${error.message}`);
+      throw new ServerError(error, 'Cannot add room to the user room list');
+    }
   };
 
   clearCollection = async () => {
-    const client = await this.__getClient();
-    client.db(this.dbName).dropDatabase();
+    client.db().dropDatabase();
   };
 }
 
