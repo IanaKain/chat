@@ -62,12 +62,15 @@ app.use(session({
 app.use((req, res, next) => {
   if (req.session && req.session.user) {
     app.locals.username = req.session.user.username;
+    app.locals.room = req.session.user.room;
     next();
   } else if (!app.locals.username && req.body.username) {
     app.locals.username = req.body.username;
+    app.locals.room = req.body.room;
     next();
   } else if (!app.locals.username) {
     app.locals.username = null;
+    app.locals.room = null;
     next();
   } else {
     next();
@@ -127,8 +130,12 @@ chat.on(socketEvents.connection, async (socket) => {
   communicate.informUserConnected();
   communicate.sendUsersList();
 
-  socket.on(socketEvents.typeStart, () => { communicate.toggleUserIsTyping(true); });
-  socket.on(socketEvents.typeEnd, () => { communicate.toggleUserIsTyping(false); });
+  socket.on(socketEvents.typeStart, () => {
+    communicate.toggleUserIsTyping(true, socket);
+  });
+  socket.on(socketEvents.typeEnd, () => {
+    communicate.toggleUserIsTyping(false, socket);
+  });
 
   socket.on(socketEvents.sendMessage, (msg, cb) => {
     db.chat.addMessage(formatMessage(msg, user).peer())
@@ -149,6 +156,7 @@ chat.on(socketEvents.connection, async (socket) => {
     communicate.informUserDisconnected();
 
     app.locals.username = null;
+    app.locals.room = null;
   });
 });
 

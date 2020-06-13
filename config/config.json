@@ -18,8 +18,11 @@
   },
   "templates": {
     "login": "index",
-    "join": "join",
-    "chat": "chat"
+    "chat": "chat",
+    "users": "users",
+    "message": "message",
+    "history": "historyMessage",
+    "typing": "typingMessage"
   },
   "db": {
     "connectionStr": "mongodb+srv://owner:zerogravity@mycluster-f7pss.mongodb.net/test?replicaSet=MyCluster-shard-0&authSource=admin&retryWrites=true&w=majority",

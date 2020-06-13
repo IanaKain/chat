@@ -3,7 +3,13 @@ const db = require('../db/index').collections();
 const config = require('../config/config');
 const { ServerError } = require('../utils/error');
 
-const formTitle = { title: 'Welcome to chatroom', user: null, error: null };
+const formTitle = {
+  form: config.routes.login,
+  loginPath: config.routes.login,
+  joinPath: config.routes.join,
+  user: null,
+  error: null
+};
 const errors = {
   wrongPassword: 'Error: Incorrect password.',
   userExists: 'Error: User already exists.',
@@ -18,9 +24,8 @@ const isUserAuthorized = async (user, password) => {
 
 const securePassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
-  const userPwd = await bcrypt.hash(password, salt);
 
-  return userPwd;
+  return await bcrypt.hash(password, salt);
 };
 
 const findAndAuthorize = async (fromData) => {
@@ -97,7 +102,7 @@ exports.joinIndex = (req, res, next) => {
   try {
     req.session.user
       ? goToChat(req, res)
-      : res.render(config.templates.join, formTitle)
+      : res.render(config.templates.login, { ...formTitle, form: formTitle.joinPath })
   } catch (error) {
     next(new ServerError(error));
   }
@@ -110,10 +115,12 @@ exports.join = async (req, res, next) => {
     const userFound = await db.users.findUser(req.body.username);
 
     if (userFound) {
-      res.render(config.templates.join, { ...formTitle, user: userFound, error: errors.userExists })
+      res.render(config.templates.login, { ...formTitle, form: formTitle.joinPath, user: userFound, error: errors.userExists })
     } else {
-      const userToAdd = { ...req.body, password: await securePassword(req.body.password) };
-      const newUser = await db.users.addUser(userToAdd);
+      const newUser = await db.users.addUser({
+        ...req.body,
+        password: await securePassword(req.body.password)
+      });
 
       goToChat(req, res, newUser);
     }
