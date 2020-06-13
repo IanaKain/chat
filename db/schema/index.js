@@ -1,6 +1,6 @@
 const userSchema = {
   bsonType: "object",
-  required: ["username", "password", "rooms"],
+  required: ["username", "password", "room"],
   properties: {
     username: {
       bsonType: "string",
@@ -10,20 +10,9 @@ const userSchema = {
       bsonType: "string",
       description: "password is required"
     },
-    currentRoom: {
+    room: {
       bsonType: "string",
     },
-    rooms: {
-      bsonType: ["array"],
-      minItems: 1,
-      uniqueItems: true,
-      additionalProperties: false,
-      items: {
-        bsonType: ["string"],
-        additionalProperties: false,
-        description: "'items' must contain the stated fields.",
-      }
-    }
   }
 };
 

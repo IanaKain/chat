@@ -51,8 +51,6 @@ const goToChat = (req, res, user) => {
 
 exports.loginIndex = async (req, res, next) => {
   try {
-    // await db.users.clearCollection();
-    // await db.chat.clearCollection();
     req.session.user
       ? goToChat(req, res)
       : res.render(config.templates.login, formTitle);
@@ -67,9 +65,9 @@ exports.login = async (req, res, next) => {
     const userFound = await findAndAuthorize(req.body);
 
     if (userFound) {
-      if (!userFound.currentRoom || userFound.currentRoom !== req.body.currentRoom) {
-        await db.users.addRoomToUser(userFound, req.body.currentRoom);
-        goToChat(req, res, { ...userFound, currentRoom: req.body.currentRoom });
+      if (!userFound.room || userFound.room !== req.body.room) {
+        await db.users.addRoomToUser(userFound, req.body.room);
+        goToChat(req, res, { ...userFound, room: req.body.room });
       } else {
         goToChat(req, res, userFound);
       }
@@ -126,8 +124,6 @@ exports.join = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
-    const isCurrentRoomRemoved = await db.users.removeRoomFromUser(req.session.user);
-    console.log(2, isCurrentRoomRemoved.value);
     if (req.session) {
       req.session.destroy((error) => {
         if (!error) {

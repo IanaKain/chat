@@ -25,12 +25,7 @@ socket
   .on(socketEvents.connect, () => { console.log('socket connected', socket.id); })
   .on(socketEvents.disconnect, () => { window.location.href = '/logout'; })
   .on(socketEvents.sendInviteResult, notification => {
-    const div = document.createElement('div');
-    div.innerHTML = notification;
 
-    const inviteConfirmation = document.getElementById('invite-confirmation');
-    inviteConfirmation.appendChild(div);
-    setTimeout(() => { inviteConfirmation.parentNode.removeChild(inviteConfirmation); }, 4000);
   })
   .on(socketEvents.typeStart, html => { document.getElementById("chat-message-isTyping").innerHTML = html; })
   .on(socketEvents.typeEnd, () => { document.getElementById("chat-message-isTyping").innerHTML = null; })
@@ -75,7 +70,7 @@ window.onload = function() {
     event.preventDefault();
     const message = event.target.elements.message;
 
-    socket.emit(socketEvents.sendMessage, message.value, (result) => { console.log('message', result); });
+    socket.emit(socketEvents.sendMessage, message.value);
     message.value = '';
     message.focus();
   });
@@ -84,7 +79,14 @@ window.onload = function() {
     event.preventDefault();
     const email = event.target.elements.email;
 
-    socket.emit(socketEvents.sendInvite, email.value);
+    socket.emit(socketEvents.sendInvite, email.value, () => {
+      const div = document.createElement('div');
+      div.innerHTML = 'Your invite has been sent';
+
+      const inviteConfirmation = document.getElementById('invite-confirmation');
+      inviteConfirmation.appendChild(div);
+      setTimeout(() => { inviteConfirmation.parentNode.removeChild(inviteConfirmation); }, 4000);
+    });
     setTimeout(() => { email.value = ''; }, 1000);
   });
 };

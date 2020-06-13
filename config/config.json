@@ -28,5 +28,10 @@
       "useNewUrlParser": true,
       "useUnifiedTopology": true
     }
+  },
+  "socket": {
+    "origins": "localhost:*",
+    "pingInterval": 900000,
+    "pingTimeout": 60000
   }
 }

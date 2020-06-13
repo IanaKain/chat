@@ -16,7 +16,7 @@ const peerMessage = (msg, user) => ({
   role: PEER,
   userId: user.userId,
   username: user.username,
-  room: user.currentRoom,
+  room: user.room,
   text: msg,
   time: moment().calendar(),
 });
