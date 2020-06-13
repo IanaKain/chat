@@ -5,21 +5,10 @@ class ServerCommunication {
     this.io = io;
     this.server = app;
     this.socket = null;
-    this.currentRoom = null;
-    this.user = null;
   }
 
   setSocket = (socket) => {
     this.socket = socket;
-  };
-
-  setUser = (user) => {
-    this.user = user;
-    this.setRoom(user.currentRoom);
-  };
-
-  setRoom = (currentRoom) => {
-    this.currentRoom = currentRoom;
   };
 
   get toAll() {
@@ -35,11 +24,11 @@ class ServerCommunication {
   };
 
   get toAllInRoom() {
-    return this.io.in(this.currentRoom).emit.bind(this.io);
+    return this.io.in(this.socket.handshake.user.room).emit.bind(this.io);
   };
 
   get toAllInRoomExceptSender() {
-    return this.socket.to(this.currentRoom).emit.bind(this.socket);
+    return this.socket.to(this.socket.handshake.user.room).emit.bind(this.socket);
   };
 
   get toAllTemp() {
@@ -49,16 +38,20 @@ class ServerCommunication {
     };
   };
 
+  get usersInCurrentRoom() {
+    return Object.values(this.io.connected).reduce((acc, client) => {
+      return client.handshake.user.room === this.socket.handshake.user.room
+        ? [...acc, client.handshake.user.username]
+        : acc;
+    }, []);
+  }
+
   sendPrivateMessage = (id, msg) => this.io.to(id).emit('html:message:private', msg).bind(this.io);
 
   sendWelcomeMsg = () => {
     this.server.render('message', formatMessage( 'Welcome to the Chat!').admin(), (err, html) => {
       this.toSender('html:message:admin', html);
     });
-  };
-
-  sendInviteConfirmation = () => {
-    this.toSender('email:result', 'Your invite has been sent');
   };
 
   sendHistory = (history) => {
@@ -68,26 +61,26 @@ class ServerCommunication {
   };
 
   informUserConnected = () => {
-    this.server.render('message', formatMessage( `${this.user.username} has joined the chat`).admin(), (err, html) => {
+    this.server.render('message', formatMessage( `${this.socket.handshake.user.username} has joined the chat`).admin(), (err, html) => {
       this.toAllInRoomExceptSender('html:message:admin', html);
     });
   };
 
   informUserDisconnected = () => {
-    this.server.render('message', formatMessage( `${this.user.username} has left the chat`).admin(), (err, html) => {
+    this.server.render('message', formatMessage( `${this.socket.handshake.user.username} has left the chat`).admin(), (err, html) => {
       this.toAllInRoomExceptSender('html:message:admin', html);
     });
   };
 
-  sendUsersList = (list) => {
-    this.server.render('users', { users: list }, (err, html) => {
+  sendUsersList = () => {
+    this.server.render('users', { users: this.usersInCurrentRoom }, (err, html) => {
       this.toAllInRoom('html:users', html);
     });
   };
 
   toggleUserIsTyping = (isTyping) => {
     if (isTyping) {
-      this.server.render('typingMessage', { ...this.user }, (err, html) => {
+      this.server.render('typingMessage', { ...this.socket.handshake.user }, (err, html) => {
         this.toAllExceptSender('typing:start', html);
       });
     } else {
@@ -96,7 +89,7 @@ class ServerCommunication {
   };
 
   sendMessage = (msg) => {
-    this.server.render('message', formatMessage(msg, this.user).peer(), (err, html) => {
+    this.server.render('message', formatMessage(msg, this.socket.handshake.user).peer(), (err, html) => {
       this.toAllInRoomExceptSender('html:message:peer', html);
       this.toSender('html:message:owner', html);
     });
