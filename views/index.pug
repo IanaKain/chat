@@ -5,10 +5,14 @@ block content
     .container-page__content
       .container-page__form
         .header-block
-          a.link(href='/join') Sign up
-          h1= title
+          if form === loginPath
+            h1 Log in to chat
+            a.link(href= joinPath) I don't have an account
+          else
+            h1 Join to chat
+            a.link(href= loginPath) I have an account
         form#enter-form(
-          action='/login'
+          action= form
           method='post'
         )
           .form-item
@@ -34,8 +38,7 @@ block content
               option(value='nodejs') NodeJS
               option(value='python') Python
           if error
-            .error
-              p.error-message= error
+            include error.pug
           .form-item.form-button
             input#submit(
               type='submit'

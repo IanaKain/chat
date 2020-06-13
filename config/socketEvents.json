@@ -11,5 +11,6 @@
   "renderMessageHistory": "html:message",
   "renderAdminMessage": "html:message:admin",
   "renderOwnerMessage": "html:message:owner",
-  "renderPeerMessage": "html:message:peer"
+  "renderPeerMessage": "html:message:peer",
+  "renderPrivateMessage": "html:message:private"
 }
