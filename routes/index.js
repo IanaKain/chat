@@ -2,20 +2,8 @@ const bcrypt = require('bcrypt');
 const db = require('../db/index').collections();
 const config = require('../config/config');
 const { ServerError } = require('../utils/error');
+const constants = require('../constants/index');
 
-const formTitle = {
-  form: config.routes.login,
-  loginPath: config.routes.login,
-  joinPath: config.routes.join,
-  user: null,
-  error: null
-};
-const errors = {
-  wrongPassword: 'Error: Incorrect password.',
-  userExists: 'Error: User already exists.',
-  userNotFound: 'Error: User already exists.',
-  serverError: 'Error: Something went wrong.',
-};
 
 const isUserAuthorized = async (user, password) => {
   const validPassword = await bcrypt.compare(password, user.password);
@@ -36,10 +24,10 @@ const findAndAuthorize = async (fromData) => {
     if (isAuthorized) {
       return { ...fromData, ...userFound };
     } else {
-      throw new ServerError({ message: errors.wrongPassword });
+      throw new ServerError({ message: constants.errors.wrongPassword });
     }
   }
-  throw new ServerError({ message: errors.userNotFound });
+  throw new ServerError({ message: constants.errors.userNotFound });
 };
 
 const goToChat = (req, res, user) => {
@@ -58,7 +46,7 @@ exports.loginIndex = async (req, res, next) => {
   try {
     req.session.user
       ? goToChat(req, res)
-      : res.render(config.templates.login, formTitle);
+      : res.render(config.templates.login, constants.formProps);
   } catch (error) {
     next(new ServerError(error));
   }
@@ -78,10 +66,10 @@ exports.login = async (req, res, next) => {
       }
     }
   } catch (error) {
-    if (error.message === errors.wrongPassword) {
-      return res.render(config.templates.login, { ...formTitle, user: null, error: errors.wrongPassword });
+    if (error.message === constants.errors.wrongPassword) {
+      return res.render(config.templates.login, { ...constants.formProps, user: null, error: constants.errors.wrongPassword });
     }
-    if (error.message === errors.userNotFound) {
+    if (error.message === constants.errors.userNotFound) {
       return res.redirect(config.routes.join);
     }
     next(new ServerError(error));
@@ -102,7 +90,7 @@ exports.joinIndex = (req, res, next) => {
   try {
     req.session.user
       ? goToChat(req, res)
-      : res.render(config.templates.login, { ...formTitle, form: formTitle.joinPath })
+      : res.render(config.templates.login, { ...constants.formProps, form: constants.formProps.joinPath })
   } catch (error) {
     next(new ServerError(error));
   }
@@ -115,7 +103,7 @@ exports.join = async (req, res, next) => {
     const userFound = await db.users.findUser(req.body.username);
 
     if (userFound) {
-      res.render(config.templates.login, { ...formTitle, form: formTitle.joinPath, user: userFound, error: errors.userExists })
+      res.render(config.templates.login, { ...constants.formProps, form: constants.formProps.joinPath, user: userFound, error: constants.errors.userExists })
     } else {
       const newUser = await db.users.addUser({
         ...req.body,
