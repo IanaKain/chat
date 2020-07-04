@@ -21,13 +21,19 @@ const peerMessage = (msg, user) => ({
   time: moment().calendar(),
 });
 
+const ownerMessage = (msg, user) => ({
+  role: OWNER,
+  userId: user.userId,
+  username: user.username,
+  room: user.room,
+  text: msg,
+  time: moment().calendar(),
+});
+
 const formatMessage = (msg, user) => ({
   admin: () => adminMessage(msg),
   peer: () => peerMessage(msg, user),
+  owner: () => ownerMessage(msg, user),
 });
-
-const messageToClient = () => {
-
-};
 
 module.exports = formatMessage;

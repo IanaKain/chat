@@ -24,8 +24,6 @@ client.connect().then(() => {
   logger.error('Error while connect to DB.', error.message, error.reason);
 });
 
-
-
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server, config.socket); // todo add logger -> winston to options
@@ -123,41 +121,53 @@ chat.on(socketEvents.connection, async (socket) => {
   communicate.setSocket(socket);
   socket.join(user.room);
 
-  const messages = await db.chat.getRoomMessages(user.room, user.userId);
+  try {
+    const messages = await db.chat.getRoomMessages(user.room, user.userId);
 
-  communicate.sendHistory(messages);
-  communicate.sendWelcomeMsg();
-  communicate.informUserConnected();
-  communicate.sendUsersList();
-
-  socket.on(socketEvents.typeStart, () => {
-    communicate.toggleUserIsTyping(true, socket);
-  });
-  socket.on(socketEvents.typeEnd, () => {
-    communicate.toggleUserIsTyping(false, socket);
-  });
-
-  socket.on(socketEvents.sendMessage, (msg, cb) => {
-    db.chat.addMessage(formatMessage(msg, user).peer())
-      .then(() => communicate.sendMessage(msg))
-      .then(() => cb(msg))
-      .catch((error) => console.warn(error.message));
-  });
-
-  socket.on(socketEvents.sendInvite, (receivers, cb) => {
-    sendInvite({ from: user.username, to: receivers, link: socket.handshake.headers.origin })
-      .then(cb)
-      .catch(error => communicate.toSender(socketEvents.sendInviteResult, error.message));
-  });
-
-  socket.on(socketEvents.disconnect, async () => {
-    logger.info(`User ${user.username} disconnected`);
+    communicate.sendHistory(messages);
+    communicate.sendWelcomeMsg();
+    communicate.informUserConnected();
     communicate.sendUsersList();
-    communicate.informUserDisconnected();
 
-    app.locals.username = null;
-    app.locals.room = null;
-  });
+    socket.on(socketEvents.typeStart, () => {
+      communicate.toggleUserIsTyping(true, socket);
+    });
+    socket.on(socketEvents.typeEnd, () => {
+      communicate.toggleUserIsTyping(false, socket);
+    });
+
+    socket.on(socketEvents.sendMessage, (msg) => {
+      db.chat.addMessage(formatMessage(msg, user).peer())
+        .then(() => communicate.sendMessage(msg, socket))
+        .catch((error) => console.warn(error.message));
+    });
+
+    socket.on(socketEvents.sendInvite, (receivers, cb) => {
+      sendInvite({ from: user.username, to: receivers, link: socket.handshake.headers.origin })
+        .then(cb)
+        .catch(error => communicate.toSender(socketEvents.sendInviteResult, error.message));
+    });
+
+    socket.on(socketEvents.disconnect, async (data) => {
+      logger.info(`User ${user.username} disconnected ${data}`);
+      communicate.sendUsersList();
+      communicate.informUserDisconnected();
+
+      app.locals.username = null;
+      app.locals.room = null;
+    });
+
+    socket.on(socketEvents.disconnect, async (data) => {
+      logger.info(`User ${user.username} disconnected ${data}`);
+      communicate.sendUsersList();
+      communicate.informUserDisconnected();
+
+      app.locals.username = null;
+      app.locals.room = null;
+    });
+  } catch (e) {
+    throw Error(e);
+  }
 });
 
 server.listen(process.env.PORT, () => {

@@ -95,10 +95,20 @@ class ServerCommunication {
     }
   };
 
-  sendMessage = (msg) => {
-    this.server.render(config.templates.message, formatMessage(msg, this.socket.handshake.user).peer(), (err, html) => {
-      this.toAllInRoomExceptSender(socketEvents.renderPeerMessage, html);
-      this.toSender(socketEvents.renderOwnerMessage, html);
+  sendMessage = (msg, socket) => {
+    const isOwner = socket.handshake.user.userId === this.socket.handshake.user.userId;
+    const message = isOwner
+      ? formatMessage(msg, socket.handshake.user).owner()
+      : formatMessage(msg, socket.handshake.user).peer();
+
+    this.server.render(config.templates.message, message, (err, html) => {
+      if (isOwner) {
+        this.toAllInRoomExceptSender(socketEvents.renderPeerMessage, html);
+        this.toSender(socketEvents.renderOwnerMessage, html);
+      } else {
+        socket.to(socket.handshake.user.room).emit(socketEvents.renderPeerMessage, html);
+        socket.emit(socketEvents.renderOwnerMessage, html);
+      }
     });
   };
 }

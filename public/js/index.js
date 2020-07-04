@@ -8,8 +8,9 @@ const senderTypes = {
 
 const socket = io('/chat', {
   transports: ['websocket'],
-  upgrade: false, query: "foo=bar",
+  upgrade: false,
   autoConnect: false,
+  reconnection: false,
 });
 
 const connect = () => {
@@ -22,11 +23,7 @@ const disconnect = () => {
 };
 
 socket
-  .on(socketEvents.connect, () => { console.log('socket connected', socket.id); })
   .on(socketEvents.disconnect, () => { window.location.href = '/logout'; })
-  .on(socketEvents.sendInviteResult, notification => {
-
-  })
   .on(socketEvents.typeStart, html => { document.getElementById("chat-message-isTyping").innerHTML = html; })
   .on(socketEvents.typeEnd, () => { document.getElementById("chat-message-isTyping").innerHTML = null; })
   .on(socketEvents.renderUsers, html => { document.querySelector('.chat-sidebar__room-users-data').innerHTML = html; })

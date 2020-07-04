@@ -194,6 +194,8 @@ select
 .chat-header__room-name
   width: 80%
   margin: 0 auto;
+  display: flex;
+  justify-content: flex-start;
 
   .room-name
     position: relative;
@@ -203,11 +205,9 @@ select
     text-transform: capitalize;
     letter-spacing: 0.8px;
 
-    .fa.fa-comment
-      position: absolute;
-      right: -28px;
-      top: -6px;
-      color: color-light-base;
+  .fa.fa-comment
+    margin-left: 20px;
+    color: color-light-base;
 
 .header__chat-leave-btn
   width: 100px

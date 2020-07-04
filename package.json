@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon index.js"
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
@@ -16,6 +16,7 @@
     "errorhandler": "^1.5.1",
     "express": "~4.16.1",
     "express-session": "^1.17.1",
+    "googleapis": "^52.1.0",
     "http": "0.0.1-security",
     "http-errors": "~1.6.3",
     "moment": "^2.26.0",
