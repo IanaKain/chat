@@ -3,50 +3,30 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
 const logger = require('../utils/logger')(module);
+const config = require('../config/config');
 
 
-const oauth2Client = new OAuth2(
-  "11979912435-2toanlpde8dg7uk0krb2fu2a4i1l5c1m.apps.googleusercontent.com", // ClientID
-  "8bJ1CBh-lZy5Yb6ZA9wQe2pp", // Client Secret
-  "https://developers.google.com/oauthplayground" // Redirect URL
-);
-
-oauth2Client.setCredentials({
-  refresh_token: "1//0414zBNIhkl-zCgYIARAAGAQSNwF-L9Irgn3IOCjzWm_DMNq7zYQ_n2k6hfh5woAuBVQanz7eTSBdTKFgIi5nTizNHz3OnwmfOTQ",
-});
+const oauth2Client = new OAuth2(process.env.clientID, process.env.clientSecret, config.mailer.redirectURL);
+oauth2Client.setCredentials({ refresh_token: process.env.refreshToken });
 
 const accessToken = oauth2Client.getAccessToken();
 
 const smtpTransport = nodemailer.createTransport({
-  service: "gmail",
+  service: config.mailer.service,
   auth: {
-    type: "OAuth2",
-    user: "chat.info.invite@gmail.com",
-    clientId: "11979912435-2toanlpde8dg7uk0krb2fu2a4i1l5c1m.apps.googleusercontent.com",
-    clientSecret: "8bJ1CBh-lZy5Yb6ZA9wQe2pp",
-    refreshToken: "1//0414zBNIhkl-zCgYIARAAGAQSNwF-L9Irgn3IOCjzWm_DMNq7zYQ_n2k6hfh5woAuBVQanz7eTSBdTKFgIi5nTizNHz3OnwmfOTQ",
+    type: config.mailer.auth,
+    user: config.mailer.user,
+    clientId: process.env.clientID,
+    clientSecret: process.env.clientSecret,
+    refreshToken: process.env.refreshToken,
     accessToken: accessToken
   }
 });
 
-// Only needed if you don't have a real mail account for testing
-// let testAccount = await nodemailer.createTestAccount();
-
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   secure: false,
-//   auth: {
-//     user: 'chat.info.invite@gmail.com',
-//     pass: 'isY46/js09(siT)'
-//   },
-//   tls: { rejectUnauthorized: false }
-// });
-
-
 const sendInvite = async ({ from, to, link }) => {
   try {
     const result = await smtpTransport.sendMail({
-      from: 'chat.info.invite@gmail.com',
+      from: config.mailer.user,
       to,
       subject: "Invite to chat",
       html: `
