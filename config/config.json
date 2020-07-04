@@ -36,5 +36,11 @@
     "origins": "*:*",
     "pingInterval": 12000,
     "pingTimeout": 120000
+  },
+  "mailer": {
+    "redirectURL": "https://developers.google.com/oauthplayground",
+    "user": "chat.info.invite@gmail.com",
+    "auth": "OAuth2",
+    "service": "gmail"
   }
 }
