@@ -60,6 +60,12 @@ block content
               .form-item.form-button
                 button#send-message-btn(type='submit')
                   i.fa.fa-paper-plane
+                .form-item.form-upload
+                  form#upload-file
+                    label.attach-file(for='file')
+                      i.fa.fa-paperclip
+                      input(type='file' id='file' name='file')
+
 block body_end
   script
     include ../config/socketEvents.js

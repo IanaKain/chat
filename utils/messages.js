@@ -9,31 +9,36 @@ const adminMessage = (msg) => ({
   userId: ADMIN,
   username: ADMIN,
   text: msg,
-  time: moment().calendar(),
+  createTime: moment().calendar(Date.now()),
+  updateTime: null,
 });
 
-const peerMessage = (msg, user) => ({
+const peerMessage = (msg, user, src) => ({
   role: PEER,
   userId: user.userId,
   username: user.username,
   room: user.room,
   text: msg,
-  time: moment().calendar(),
+  imgSrc: src,
+  createTime: moment().calendar(Date.now()),
+  updateTime: null,
 });
 
-const ownerMessage = (msg, user) => ({
+const ownerMessage = (msg, user, src) => ({
   role: OWNER,
   userId: user.userId,
   username: user.username,
   room: user.room,
   text: msg,
-  time: moment().calendar(),
+  imgSrc: src,
+  createTime: moment().calendar(Date.now()),
+  updateTime: null,
 });
 
-const formatMessage = (msg, user) => ({
+const formatMessage = (msg, user, src) => ({
   admin: () => adminMessage(msg),
-  peer: () => peerMessage(msg, user),
-  owner: () => ownerMessage(msg, user),
+  peer: () => peerMessage(msg, user, src),
+  owner: () => ownerMessage(msg, user, src),
 });
 
 module.exports = formatMessage;

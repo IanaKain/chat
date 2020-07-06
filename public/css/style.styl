@@ -15,10 +15,10 @@ body
   background-color: #b6cbe0;
 
 h1
+  display: block;
   margin: 0;
-  padding: 0 96px 0;
   color: color-light-base;
-  text-align: right;
+  text-align: left;
   font-family: sans-serif;
   font-weight: 400;
   font-size: 26px;
@@ -52,13 +52,14 @@ h1
 .header-block
   display: flex;
   justify-content: space-between;
+  width: 80%;
+  margin: 0 auto;
 
   .link
     display: block;
-    width: 240px;
     color: color-light-base;
     outline: none;
-    text-align: center;
+    text-align: right;
     line-height: 34px;
     font-size: 20px;
 
@@ -353,9 +354,12 @@ select
 
 .chat-message-block__message
   max-width: 450px;
-  margin: 10px auto
-  padding: 15px;
-  border-radius: 18px
+  margin: 10px auto;
+  padding: 12px 16px;
+  border-radius: 16px
+
+.chat-message-block__message.owner
+  padding-bottom: 8px;
 
 .chat-message-block__message.owner
   margin: 10px 8px 10px auto
@@ -390,7 +394,7 @@ select
   justify-content: space-between
   justify-items: center
   align-items: center
-  margin-bottom: 6px
+  margin-bottom: 8px
   padding: 0 2px
 
 .message__user-name
@@ -485,7 +489,40 @@ select
 
     .fa.fa-paper-plane
       color: color-light-base;
+      font-size: 26px;
+
+    .fa.fa-paperclip
+      color: color-light-base;
       font-size: 30px;
+
+  .attach-file
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    border-left: 2px solid color-light-base;
+    cursor: pointer;
+
+  #file
+    display: none;
+
+.message__user-img
+  img
+    height: 100px;
+
+.message__user-actions
+  text-align: right;
+
+  .delete-message-btn
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    .fa.fa-trash-o
+      font-size: 16px;
+      color: color-light-base;
 
 .footer__chat-message-input
   width: 96%

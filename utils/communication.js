@@ -97,9 +97,7 @@ class ServerCommunication {
 
   sendMessage = (msg, socket) => {
     const isOwner = socket.handshake.user.userId === this.socket.handshake.user.userId;
-    const message = isOwner
-      ? formatMessage(msg, socket.handshake.user).owner()
-      : formatMessage(msg, socket.handshake.user).peer();
+    const message = {...msg, role: isOwner ? 'owner' : 'peer'};
 
     this.server.render(config.templates.message, message, (err, html) => {
       if (isOwner) {
@@ -109,6 +107,16 @@ class ServerCommunication {
         socket.to(socket.handshake.user.room).emit(socketEvents.renderPeerMessage, html);
         socket.emit(socketEvents.renderOwnerMessage, html);
       }
+    });
+  };
+
+  sendUpdatedMessage = (msg, socket) => {
+    const isOwner = socket.handshake.user.userId === this.socket.handshake.user.userId;
+    const message = {...msg, role: isOwner ? 'owner' : 'peer'};
+
+    this.server.render(config.templates.message, message, (err, html) => {
+      this.toAllInRoomExceptSender(socketEvents.editMessageSuccess, html);
+      this.toSender(socketEvents.editMessageSuccess, html);
     });
   };
 }

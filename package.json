@@ -6,6 +6,7 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
+    "base64-img": "^1.0.4",
     "bcrypt": "^4.0.1",
     "body-parser": "^1.19.0",
     "connect-mongo": "^3.2.0",
@@ -15,6 +16,7 @@
     "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
     "express": "~4.16.1",
+    "express-fileupload": "^1.1.7-alpha.3",
     "express-session": "^1.17.1",
     "googleapis": "^52.1.0",
     "http": "0.0.1-security",

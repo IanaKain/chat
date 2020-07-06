@@ -1,5 +1,6 @@
 let typing = false;
 let timeout = undefined;
+let messageIdInEditMode = null;
 const senderTypes = {
   admin: 'admin',
   owner: 'owner',
@@ -27,14 +28,35 @@ socket
   .on(socketEvents.typeStart, html => { document.getElementById("chat-message-isTyping").innerHTML = html; })
   .on(socketEvents.typeEnd, () => { document.getElementById("chat-message-isTyping").innerHTML = null; })
   .on(socketEvents.renderUsers, html => { document.querySelector('.chat-sidebar__room-users-data').innerHTML = html; })
-  .on(socketEvents.renderMessageHistory, html => { document.getElementById("history-message-block").innerHTML = html; });
+  .on(socketEvents.uploadFileResult, path => {
+    const demoImage = document.createElement('img');
+    demoImage.src = path;
+    document
+      .getElementById("chat-message-block")
+      .appendChild(demoImage);
+  })
+  .on(socketEvents.renderMessageHistory, html => { document.getElementById("history-message-block").innerHTML = html; })
+  .on(socketEvents.deleteMessageSuccess, messageId => {
+    const element = document.getElementById(messageId);
+    element.remove();
+  })
+  .on(socketEvents.editMessageSuccess, (html) => {
+    const messageToEdit = document.getElementById(messageIdInEditMode);
+    const textInput = document.getElementById("message");
+
+    messageToEdit.outerHTML = html;
+    textInput.value = '';
+    textInput.focus();
+
+    messageIdInEditMode = null;
+  });
 
 for (const type in senderTypes) {
   ((sender) => {
     const chatMsgBlock = document.querySelector('.chat-messages');
 
     socket.on(`${socketEvents.renderMessageHistory}:${sender}`, (html) => {
-      renderHTML({ html, sender });
+      renderHTML(html);
       chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
     });
   })(senderTypes[type]);
@@ -60,6 +82,13 @@ window.onload = function() {
   const chatForm = document.getElementById('chat-form');
   const textInput = document.getElementById("message");
   const inviteForm = document.getElementById("chat-invite-form");
+  const inputUpload = document.getElementById("file");
+
+  inputUpload.addEventListener("change", ({ target }) => {
+    const reader = new FileReader();
+    reader.onload = event => { socket.emit(socketEvents.uploadFile, event.target.result); };
+    reader.readAsDataURL(target.files[0]);
+  });
 
   textInput.addEventListener('keydown', onKeyDownNotEnter);
 
@@ -67,9 +96,13 @@ window.onload = function() {
     event.preventDefault();
     const message = event.target.elements.message;
 
-    socket.emit(socketEvents.sendMessage, message.value);
-    message.value = '';
-    message.focus();
+    if (messageIdInEditMode) {
+      socket.emit(socketEvents.editMessage, messageIdInEditMode, message.value);
+    } else {
+      socket.emit(socketEvents.sendMessage, message.value);
+      message.value = '';
+      message.focus();
+    }
   });
 
   inviteForm.addEventListener('submit', (event) => {
@@ -88,17 +121,25 @@ window.onload = function() {
   });
 };
 
-function renderHTML({ html, sender }){
+function renderHTML(html){
   if(html) {
-    const message = document.createElement('div');
-    message.classList.add('chat-message-block__message');
-    message.classList.add(sender);
-    message.innerHTML = html;
-
-    document
-      .getElementById("chat-message-block")
-      .appendChild(message);
+    const messageBlock = document.getElementById("chat-message-block");
+    messageBlock.innerHTML = messageBlock.innerHTML + html;
   } else {
     console.log("There is a problem:", html);
   }
+}
+
+function deleteMessage(messageId) {
+  socket.emit(socketEvents.deleteMessage, messageId);
+}
+
+function editMessage(messageId) {
+  messageIdInEditMode = messageId;
+  const message = document.getElementById(messageId);
+  const messageContent = message.querySelector('.message__user-content').textContent;
+  const textInput = document.getElementById("message");
+
+  textInput.value = messageContent;
+  textInput.focus();
 }

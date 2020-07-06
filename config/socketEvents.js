@@ -5,6 +5,10 @@ const socketEvents = {
   "typeStart": "typing:start",
   "typeEnd": "typing:end",
   "sendMessage": "message:send",
+  "editMessage": "message:edit",
+  "editMessageSuccess": "message:edit:success",
+  "deleteMessage": "message:delete",
+  "deleteMessageSuccess": "message:delete:success",
   "sendInvite": "email:send",
   "sendInviteResult": "email:result",
   "renderUsers": "html:users",
@@ -12,5 +16,7 @@ const socketEvents = {
   "renderAdminMessage": "html:message:admin",
   "renderOwnerMessage": "html:message:owner",
   "renderPeerMessage": "html:message:peer",
-  "renderPrivateMessage": "html:message:private"
+  "renderPrivateMessage": "html:message:private",
+  "uploadFile": "file:upload",
+  "uploadFileResult": "file:upload:result"
 };
