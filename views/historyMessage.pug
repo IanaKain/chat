@@ -1,18 +1,6 @@
 for item in messages || []
-  div(id=item._id class=`chat-message-block__message ${item.owner ? 'owner': 'peer'}`)
-    .message__user-info
-      .message__user-name= item.username
-      - const date = item.updateTime ? `Updated ${item.updateTime}` : item.createTime
-      .message__date= date
+  div(id=item._id class=`chat-message-block__message ${item.role}`)
     if item.imgSrc
-      .message__user-img
-        img(src=`${item.imgSrc}`)
+      include fileMessage.pug
     else
-      .message__user-content= item.text
-    if item.owner
-      .message__user-actions
-        button.edit-message-btn(type='button', onclick="editMessage('" + item._id + "')")
-          i.fa.fa-pencil-square-o
-        button.delete-message-btn(type='button', onclick="deleteMessage('" + item._id + "')")
-          i.fa.fa-trash-o
-
+      include message.pug

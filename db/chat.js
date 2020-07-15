@@ -15,7 +15,7 @@ class Chat {
   getRoomMessages = async (room, userId) => {
     const collection = client.db().collection(this.collectionName);
     const includeFields = { userId: 1, username: 1, text: 1, createTime: 1, updateTime: 1, imgSrc: 1 };
-    const addField = { owner: { $cond: { if: { $eq: [ '$userId', userId ] }, then: true, else: false } } };
+    const addField = { role: { $cond: { if: { $eq: [ '$userId', userId ] }, then: 'owner', else: 'peer' } } };
 
     try {
       const results = await collection.aggregate([

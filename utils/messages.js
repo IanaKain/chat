@@ -4,41 +4,42 @@ const ADMIN = 'admin';
 const OWNER = 'owner';
 const PEER = 'peer';
 
+const userMessage = (user) => ({
+  userId: user.userId,
+  username: user.username,
+  room: user.room,
+  role: null,
+  text: null,
+  imgSrc: null,
+  createTime: moment().calendar(Date.now()),
+  updateTime: null,
+});
+
 const adminMessage = (msg) => ({
+  ...msg,
   role: ADMIN,
   userId: ADMIN,
   username: ADMIN,
-  text: msg,
   createTime: moment().calendar(Date.now()),
   updateTime: null,
 });
 
-const peerMessage = (msg, user, src) => ({
+const peerMessage = (msg, user) => ({
+  ...userMessage(user),
+  ...msg,
   role: PEER,
-  userId: user.userId,
-  username: user.username,
-  room: user.room,
-  text: msg,
-  imgSrc: src,
-  createTime: moment().calendar(Date.now()),
-  updateTime: null,
 });
 
-const ownerMessage = (msg, user, src) => ({
+const ownerMessage = (msg, user) => ({
+  ...userMessage(user),
+  ...msg,
   role: OWNER,
-  userId: user.userId,
-  username: user.username,
-  room: user.room,
-  text: msg,
-  imgSrc: src,
-  createTime: moment().calendar(Date.now()),
-  updateTime: null,
 });
 
-const formatMessage = (msg, user, src) => ({
+const formatMessage = (msg, user) => ({
   admin: () => adminMessage(msg),
-  peer: () => peerMessage(msg, user, src),
-  owner: () => ownerMessage(msg, user, src),
+  peer: () => peerMessage(msg, user),
+  owner: () => ownerMessage(msg, user),
 });
 
 module.exports = formatMessage;

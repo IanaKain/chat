@@ -1,0 +1,9 @@
+.message__user-info
+  .message__user-name= item.username
+  .message__date= item.updateTime ? `Updated ${item.updateTime}` : item.createTime
+.message__user-img
+  img(src=`${item.imgSrc}`)
+if item.role === 'owner'
+  .message__user-actions
+    button.delete-message-btn(type='button', onclick="deleteMessage('" + item._id + "')")
+      i.fa.fa-trash-o

@@ -1,16 +1,6 @@
-div(id=_id class=`chat-message-block__message ${role}`)
-  .message__user-info
-    .message__user-name= username
-    - const date = updateTime ? `Updated ${updateTime}` : createTime
-      .message__date= date
-  if imgSrc
-    .message__user-img
-      img(src=`${imgSrc}`)
-  else
-    .message__user-content= text
-  if role === 'owner'
-    .message__user-actions
-      button.edit-message-btn(type='button', onclick="editMessage('" + _id + "')")
-        i.fa.fa-pencil-square-o
-      button.delete-message-btn(type='button', onclick="deleteMessage('" + _id + "')")
-        i.fa.fa-trash-o
+.message__user-info
+  .message__user-name= item.username
+  .message__date= item.updateTime ? `Updated ${item.updateTime}` : item.createTime
+.message__user-content= item.text
+if item.role === 'owner'
+  include messageActions.pug
