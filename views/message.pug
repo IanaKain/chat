@@ -1,4 +1,6 @@
 .message__user-info
-  .message__user-name= username
-  .message__date= time
-.message__user-content= text
+  .message__user-name= item.username
+  .message__date= item.updateTime ? `Updated ${item.updateTime}` : item.createTime
+.message__user-content= item.text
+if item.role === 'owner'
+  include messageActions.pug

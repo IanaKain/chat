@@ -18,7 +18,7 @@ const userSchema = {
 
 const messageSchema = {
   bsonType: "object",
-  required: ["role", "userId", "username", "text", "time"],
+  required: ["role", "userId", "username", "text", "createTime"],
   properties: {
     role: {
       bsonType: "string",
@@ -32,7 +32,7 @@ const messageSchema = {
       bsonType: "string",
       description: "username is required"
     },
-    text: {
+    createTime: {
       bsonType: "string",
       description: "text is required"
     },

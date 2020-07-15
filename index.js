@@ -1,5 +1,6 @@
 const cookie = require('cookie');
 const express = require('express');
+const base64Img = require('base64-img');
 const errorhandler = require('errorhandler');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -115,30 +116,32 @@ chat.use(function(socket, next) {
   });
 });
 
+let onceConnected = [];
+
 chat.on(socketEvents.connection, async (socket) => {
   const { user } = socket.handshake;
 
-  communicate.setSocket(socket);
-  socket.join(user.room);
-
   try {
-    const messages = await db.chat.getRoomMessages(user.room, user.userId);
+    communicate.setSocket(socket);
+    socket.join(user.room);
 
+    const messages = await db.chat.getRoomMessages(user.room, user.userId);
     communicate.sendHistory(messages);
-    communicate.sendWelcomeMsg();
-    communicate.informUserConnected();
+
+    if (!onceConnected.find(id => id === user.userId)) {
+      onceConnected.push(user.userId);
+      communicate.sendWelcomeMsg();
+      communicate.informUserConnected();
+    }
+
     communicate.sendUsersList();
 
-    socket.on(socketEvents.typeStart, () => {
-      communicate.toggleUserIsTyping(true, socket);
-    });
-    socket.on(socketEvents.typeEnd, () => {
-      communicate.toggleUserIsTyping(false, socket);
-    });
+    socket.on(socketEvents.typeStart, () => { communicate.toggleUserIsTyping(true, socket); });
+    socket.on(socketEvents.typeEnd, () => { communicate.toggleUserIsTyping(false, socket); });
 
     socket.on(socketEvents.sendMessage, (msg) => {
-      db.chat.addMessage(formatMessage(msg, user).peer())
-        .then(() => communicate.sendMessage(msg, socket))
+      db.chat.addMessage(formatMessage({text: msg}, user).peer())
+        .then((message) => communicate.sendMessage(message, socket))
         .catch((error) => console.warn(error.message));
     });
 
@@ -148,22 +151,44 @@ chat.on(socketEvents.connection, async (socket) => {
         .catch(error => communicate.toSender(socketEvents.sendInviteResult, error.message));
     });
 
-    socket.on(socketEvents.disconnect, async (data) => {
-      logger.info(`User ${user.username} disconnected ${data}`);
-      communicate.sendUsersList();
-      communicate.informUserDisconnected();
+    socket.on(socketEvents.uploadFile, async (file) => {
+      base64Img.img(file, './public/images', Date.now(), (err, filePath) => {
+        const arrPath = filePath.split('/');
+        const fileName = arrPath[arrPath.length - 1];
 
-      app.locals.username = null;
-      app.locals.room = null;
+        db.chat.addMessage(formatMessage({imgSrc: `../images/${fileName}`}, user).peer())
+          .then((message) => communicate.sendMessage(message, socket))
+          .catch((error) => console.warn(error.message));
+      });
+    });
+
+    socket.on(socketEvents.editMessage, async (messageId, message) => {
+      db.chat.editMessage(messageId, message)
+        .then((newMessage) => { communicate.sendUpdatedMessage(newMessage, socket) })
+        .catch((error) => console.warn(error.message));
+    });
+
+    socket.on(socketEvents.deleteMessage, async (messageId) => {
+        db.chat.deleteMessage(messageId)
+          .then(() => socket.emit(socketEvents.deleteMessageSuccess, messageId))
+          .catch((error) => console.warn(error.message));
     });
 
     socket.on(socketEvents.disconnect, async (data) => {
-      logger.info(`User ${user.username} disconnected ${data}`);
-      communicate.sendUsersList();
-      communicate.informUserDisconnected();
+      setTimeout(() => {
+        const isDisconnected = Boolean(!communicate.usersInCurrentRoom.includes(user.username));
 
-      app.locals.username = null;
-      app.locals.room = null;
+        if (isDisconnected) {
+          logger.info(`User ${user.username} disconnected ${data}`);
+          onceConnected = onceConnected.filter(id => id !== user.userId);
+          communicate.sendUsersList();
+          communicate.informUserDisconnected();
+          communicate.removeSocket();
+
+          app.locals.username = null;
+          app.locals.room = null;
+        }
+      }, 3000);
     });
   } catch (e) {
     throw Error(e);

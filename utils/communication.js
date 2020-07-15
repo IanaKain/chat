@@ -13,6 +13,14 @@ class ServerCommunication {
     this.socket = socket;
   };
 
+  removeSocket = () => {
+    this.socket = null;
+  };
+
+  isOwner = (socket) => {
+    return socket.handshake.user.userId === this.socket.handshake.user.userId;
+  };
+
   get toAll() {
     return this.io.emit;
   }
@@ -46,7 +54,8 @@ class ServerCommunication {
   sendPrivateMessage = (id, msg) => this.io.to(id).emit(socketEvents.renderPrivateMessage, msg).bind(this.io);
 
   sendWelcomeMsg = () => {
-    this.server.render(config.templates.message, formatMessage( 'Welcome to the Chat!').admin(), (err, html) => {
+    const msg = formatMessage({text: 'Welcome to the Chat!'}).admin();
+    this.server.render(config.templates.history, { messages: [msg] }, (err, html) => {
       this.toSender(socketEvents.renderAdminMessage, html);
     });
   };
@@ -58,23 +67,17 @@ class ServerCommunication {
   };
 
   informUserConnected = () => {
-    const isUnique = Boolean(!this.usersInCurrentRoom.includes(this.socket.handshake.user.username));
-
-    if (isUnique) {
-      this.server.render(config.templates.message, formatMessage( `${this.socket.handshake.user.username} has joined the chat`).admin(), (err, html) => {
-        this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
-      });
-    }
+    const msg = formatMessage({text: `${this.socket.handshake.user.username} has joined the chat`}).admin();
+    this.server.render(config.templates.history, { messages: [msg] }, (err, html) => {
+      this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
+    });
   };
 
   informUserDisconnected = () => {
-    const isUnique = Boolean(!this.usersInCurrentRoom.includes(this.socket.handshake.user.username));
-
-    if (isUnique) {
-      this.server.render(config.templates.message, formatMessage( `${this.socket.handshake.user.username} has left the chat`).admin(), (err, html) => {
-        this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
-      });
-    }
+    const msg = formatMessage({text: `${this.socket.handshake.user.username} has left the chat`}).admin();
+    this.server.render(config.templates.history, { messages: [msg] }, (err, html) => {
+      this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
+    });
   };
 
   sendUsersList = () => {
@@ -96,12 +99,10 @@ class ServerCommunication {
   };
 
   sendMessage = (msg, socket) => {
-    const isOwner = socket.handshake.user.userId === this.socket.handshake.user.userId;
-    const message = isOwner
-      ? formatMessage(msg, socket.handshake.user).owner()
-      : formatMessage(msg, socket.handshake.user).peer();
+    const isOwner = this.isOwner(socket);
+    const message = {...msg, role: isOwner ? 'owner' : 'peer'};
 
-    this.server.render(config.templates.message, message, (err, html) => {
+    this.server.render(config.templates.history, { messages: [message] }, (err, html) => {
       if (isOwner) {
         this.toAllInRoomExceptSender(socketEvents.renderPeerMessage, html);
         this.toSender(socketEvents.renderOwnerMessage, html);
@@ -109,6 +110,16 @@ class ServerCommunication {
         socket.to(socket.handshake.user.room).emit(socketEvents.renderPeerMessage, html);
         socket.emit(socketEvents.renderOwnerMessage, html);
       }
+    });
+  };
+
+  sendUpdatedMessage = (msg, socket) => {
+    const isOwner = this.isOwner(socket);
+    const message = {...msg, role: isOwner ? 'owner' : 'peer'};
+
+    this.server.render(config.templates.history, {messages: [message]}, (err, html) => {
+      this.toAllInRoomExceptSender(socketEvents.editMessageSuccess, html);
+      this.toSender(socketEvents.editMessageSuccess, html);
     });
   };
 }

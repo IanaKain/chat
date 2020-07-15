@@ -4,30 +4,36 @@ const ADMIN = 'admin';
 const OWNER = 'owner';
 const PEER = 'peer';
 
+const userMessage = (user) => ({
+  userId: user.userId,
+  username: user.username,
+  room: user.room,
+  role: null,
+  text: null,
+  imgSrc: null,
+  createTime: moment().calendar(Date.now()),
+  updateTime: null,
+});
+
 const adminMessage = (msg) => ({
+  ...msg,
   role: ADMIN,
   userId: ADMIN,
   username: ADMIN,
-  text: msg,
-  time: moment().calendar(),
+  createTime: moment().calendar(Date.now()),
+  updateTime: null,
 });
 
 const peerMessage = (msg, user) => ({
+  ...userMessage(user),
+  ...msg,
   role: PEER,
-  userId: user.userId,
-  username: user.username,
-  room: user.room,
-  text: msg,
-  time: moment().calendar(),
 });
 
 const ownerMessage = (msg, user) => ({
+  ...userMessage(user),
+  ...msg,
   role: OWNER,
-  userId: user.userId,
-  username: user.username,
-  room: user.room,
-  text: msg,
-  time: moment().calendar(),
 });
 
 const formatMessage = (msg, user) => ({
