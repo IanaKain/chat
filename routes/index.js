@@ -1,19 +1,19 @@
 const bcrypt = require('bcrypt');
 const db = require('../db/index').collections();
 const config = require('../config/config');
-const { ServerError } = require('../utils/error');
+const {ServerError} = require('../utils/error');
 const constants = require('../constants/index');
-
 
 const isUserAuthorized = async (user, password) => {
   const validPassword = await bcrypt.compare(password, user.password);
+
   return !!validPassword;
 };
 
 const securePassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
 
-  return await bcrypt.hash(password, salt);
+  return bcrypt.hash(password, salt);
 };
 
 const findAndAuthorize = async (fromData) => {
@@ -21,13 +21,13 @@ const findAndAuthorize = async (fromData) => {
 
   if (userFound) {
     const isAuthorized = await isUserAuthorized(userFound, fromData.password);
+
     if (isAuthorized) {
-      return { ...fromData, ...userFound };
-    } else {
-      throw new ServerError({ message: constants.errors.wrongPassword });
+      return {...fromData, ...userFound};
     }
+    throw new ServerError({message: constants.errors.wrongPassword});
   }
-  throw new ServerError({ message: constants.errors.userNotFound });
+  throw new ServerError({message: constants.errors.userNotFound});
 };
 
 const goToChat = (req, res, user) => {
@@ -60,14 +60,14 @@ exports.login = async (req, res, next) => {
     if (userFound) {
       if (!userFound.room || userFound.room !== req.body.room) {
         await db.users.addRoomToUser(userFound, req.body.room);
-        goToChat(req, res, { ...userFound, room: req.body.room });
+        goToChat(req, res, {...userFound, room: req.body.room});
       } else {
         goToChat(req, res, userFound);
       }
     }
   } catch (error) {
     if (error.message === constants.errors.wrongPassword) {
-      return res.render(config.templates.login, { ...constants.formProps, user: null, error: constants.errors.wrongPassword });
+      return res.render(config.templates.login, {...constants.formProps, user: null, error: constants.errors.wrongPassword});
     }
     if (error.message === constants.errors.userNotFound) {
       return res.redirect(config.routes.join);
@@ -90,7 +90,7 @@ exports.joinIndex = (req, res, next) => {
   try {
     req.session.user
       ? goToChat(req, res)
-      : res.render(config.templates.login, { ...constants.formProps, form: constants.formProps.joinPath })
+      : res.render(config.templates.login, {...constants.formProps, form: constants.formProps.joinPath});
   } catch (error) {
     next(new ServerError(error));
   }
@@ -103,11 +103,19 @@ exports.join = async (req, res, next) => {
     const userFound = await db.users.findUser(req.body.username);
 
     if (userFound) {
-      res.render(config.templates.login, { ...constants.formProps, form: constants.formProps.joinPath, user: userFound, error: constants.errors.userExists })
+      res.render(
+        config.templates.login,
+        {
+          ...constants.formProps,
+          form: constants.formProps.joinPath,
+          user: userFound,
+          error: constants.errors.userExists,
+        }
+      );
     } else {
       const newUser = await db.users.addUser({
         ...req.body,
-        password: await securePassword(req.body.password)
+        password: await securePassword(req.body.password),
       });
 
       goToChat(req, res, newUser);
@@ -122,12 +130,12 @@ exports.logout = async (req, res, next) => {
     if (req.session) {
       req.session.destroy((error) => {
         if (!error) {
-          res.clearCookie('sid', { path: '/' });
+          res.clearCookie('sid', {path: '/'});
           res.redirect(config.routes.login);
         } else {
           next(new ServerError(error));
         }
-      })
+      });
     }
   } catch (error) {
     next(new ServerError(error));
