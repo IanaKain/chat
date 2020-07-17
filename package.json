@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": false,
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "lint": "npx eslint . --quiet --cache -- && echo \"Your code in \\033[;32m$npm_package_name\\033[0m is clear\"",
+    "lint:fix": "npx eslint --ext=js --quiet --cache --fix ."
   },
   "dependencies": {
     "base64-img": "^1.0.4",
@@ -32,7 +34,11 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.3",
-    "@types/express": "^4.17.6"
+    "@types/express": "^4.17.6",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.4.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "nodemon": "^2.0.3"
   }
 }

@@ -1,13 +1,14 @@
 const path = require('path');
-const nodemailer = require("nodemailer");
-const { google } = require("googleapis");
-const OAuth2 = google.auth.OAuth2;
-const logger = require('../utils/logger')(module);
+const nodemailer = require('nodemailer');
+const {google} = require('googleapis');
+
+const {OAuth2} = google.auth;
+const logger = require('./logger')(module);
 const config = require('../config/config');
 
-
 const oauth2Client = new OAuth2(process.env.clientID, process.env.clientSecret, config.mailer.redirectURL);
-oauth2Client.setCredentials({ refresh_token: process.env.refreshToken });
+
+oauth2Client.setCredentials({refresh_token: process.env.refreshToken});
 
 const accessToken = oauth2Client.getAccessToken();
 
@@ -19,16 +20,16 @@ const smtpTransport = nodemailer.createTransport({
     clientId: process.env.clientID,
     clientSecret: process.env.clientSecret,
     refreshToken: process.env.refreshToken,
-    accessToken: accessToken
-  }
+    accessToken,
+  },
 });
 
-const sendInvite = async ({ from, to, link }) => {
+const sendInvite = async ({from, to, link}) => {
   try {
     const result = await smtpTransport.sendMail({
       from: config.mailer.user,
       to,
-      subject: "Invite to chat",
+      subject: 'Invite to chat',
       html: `
         <div>
           <b>Hey! ${from} wants to chat with you ;)</b>
@@ -45,7 +46,7 @@ const sendInvite = async ({ from, to, link }) => {
       attachments: [{
         filename: 'stayconnected.jpg',
         path: path.join(__dirname, '../public/images/stayconnected.jpg'),
-        cid: 'dehcatta-liame-detcennocyats'
+        cid: 'dehcatta-liame-detcennocyats',
       }],
     });
 
