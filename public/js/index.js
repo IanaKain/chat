@@ -1,5 +1,5 @@
 let typing = false;
-let timeout = undefined;
+let timeout;
 let messageIdInEditMode = null;
 const senderTypes = {
   admin: 'admin',
@@ -14,6 +14,7 @@ const socket = io('/chat', {
   reconnection: false,
 });
 
+/* eslint-disable no-unused-vars */
 const connect = () => {
   socket.connect();
 };
@@ -22,6 +23,31 @@ const disconnect = () => {
   socket.disconnect();
   window.location.href = '/logout';
 };
+
+const renderHTML = (html) => {
+  if (html) {
+    const messageBlock = document.getElementById('chat-message-block');
+
+    messageBlock.innerHTML += html;
+  } else {
+    console.log('There is a problem:', html);
+  }
+};
+
+const deleteMessage = (messageId) => {
+  socket.emit(socketEvents.deleteMessage, messageId);
+};
+
+const editMessage = (messageId) => {
+  messageIdInEditMode = messageId;
+  const message = document.getElementById(messageId);
+  const messageContent = message.querySelector('.message__user-content').textContent;
+  const textInput = document.getElementById('message');
+
+  textInput.value = messageContent;
+  textInput.focus();
+};
+/* eslint-enable no-unused-vars */
 
 socket
   .on(socketEvents.disconnect, () => { window.location.href = '/logout'; })
@@ -53,6 +79,7 @@ socket
     messageIdInEditMode = null;
   });
 
+// eslint-disable-next-line
 for (const type in senderTypes) {
   ((sender) => {
     const chatMsgBlock = document.querySelector('.chat-messages');
@@ -123,27 +150,3 @@ window.onload = function () {
     setTimeout(() => { email.value = ''; }, 1000);
   });
 };
-
-function renderHTML(html) {
-  if (html) {
-    const messageBlock = document.getElementById('chat-message-block');
-
-    messageBlock.innerHTML = messageBlock.innerHTML + html;
-  } else {
-    console.log('There is a problem:', html);
-  }
-}
-
-function deleteMessage(messageId) {
-  socket.emit(socketEvents.deleteMessage, messageId);
-}
-
-function editMessage(messageId) {
-  messageIdInEditMode = messageId;
-  const message = document.getElementById(messageId);
-  const messageContent = message.querySelector('.message__user-content').textContent;
-  const textInput = document.getElementById('message');
-
-  textInput.value = messageContent;
-  textInput.focus();
-}

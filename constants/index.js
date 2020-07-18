@@ -12,5 +12,5 @@ exports.formProps = {
   loginPath: config.routes.login,
   joinPath: config.routes.join,
   user: null,
-  error: null
+  error: null,
 };

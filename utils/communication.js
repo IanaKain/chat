@@ -40,9 +40,10 @@ class ServerCommunication {
   }
 
   get usersInCurrentRoom() {
-    const users = Object.values(this.io.connected).reduce((acc, client) => client.handshake.user.room === this.socket.handshake.user.room
-      ? [...acc, client.handshake.user.username]
-      : acc, []);
+    const users = Object.values(this.io.connected)
+      .reduce((acc, client) => client.handshake.user.room === this.socket.handshake.user.room
+        ? [...acc, client.handshake.user.username]
+        : acc, []);
 
     return [...new Set(users)];
   }

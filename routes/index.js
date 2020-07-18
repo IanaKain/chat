@@ -3,24 +3,13 @@ const db = require('../db/index').collections();
 const config = require('../config/config');
 const {ServerError} = require('../utils/error');
 const constants = require('../constants/index');
-
-const isUserAuthorized = async (user, password) => {
-  const validPassword = await bcrypt.compare(password, user.password);
-
-  return !!validPassword;
-};
-
-const securePassword = async (password) => {
-  const salt = await bcrypt.genSalt(10);
-
-  return bcrypt.hash(password, salt);
-};
+const routing = require('../utils/routing');
 
 const findAndAuthorize = async (fromData) => {
   const userFound = await db.users.findUser(fromData.username);
 
   if (userFound) {
-    const isAuthorized = await isUserAuthorized(userFound, fromData.password);
+    const isAuthorized = Boolean(await bcrypt.compare(userFound, fromData.password));
 
     if (isAuthorized) {
       return {...fromData, ...userFound};
@@ -30,22 +19,10 @@ const findAndAuthorize = async (fromData) => {
   throw new ServerError({message: constants.errors.userNotFound});
 };
 
-const goToChat = (req, res, user) => {
-  if (!user && !req.session.user) {
-    res.redirect(config.routes.login);
-  }
-  if (!req.session.user) {
-    req.session.user = user;
-    res.redirect(config.routes.chat);
-  } else {
-    res.redirect(config.routes.chat);
-  }
-};
-
 exports.loginIndex = async (req, res, next) => {
   try {
     req.session.user
-      ? goToChat(req, res)
+      ? routing.goToChat(req, res)
       : res.render(config.templates.login, constants.formProps);
   } catch (error) {
     next(new ServerError(error));
@@ -54,20 +31,25 @@ exports.loginIndex = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    if (req.session.user) { return goToChat(req, res); }
+    if (req.session.user) {
+      return routing.goToChat(req, res);
+    }
+
     const userFound = await findAndAuthorize(req.body);
 
-    if (userFound) {
-      if (!userFound.room || userFound.room !== req.body.room) {
-        await db.users.addRoomToUser(userFound, req.body.room);
-        goToChat(req, res, {...userFound, room: req.body.room});
-      } else {
-        goToChat(req, res, userFound);
-      }
+    if (!userFound.room || userFound.room !== req.body.room) {
+      await db.users.addRoomToUser(userFound, req.body.room);
+
+      routing.goToChat(req, res, {...userFound, room: req.body.room});
     }
+
+    routing.goToChat(req, res, userFound);
   } catch (error) {
     if (error.message === constants.errors.wrongPassword) {
-      return res.render(config.templates.login, {...constants.formProps, user: null, error: constants.errors.wrongPassword});
+      return res.render(
+        config.templates.login,
+        {...constants.formProps, user: null, error: constants.errors.wrongPassword}
+      );
     }
     if (error.message === constants.errors.userNotFound) {
       return res.redirect(config.routes.join);
@@ -89,7 +71,7 @@ exports.chatIndex = (req, res, next) => {
 exports.joinIndex = (req, res, next) => {
   try {
     req.session.user
-      ? goToChat(req, res)
+      ? routing.goToChat(req, res)
       : res.render(config.templates.login, {...constants.formProps, form: constants.formProps.joinPath});
   } catch (error) {
     next(new ServerError(error));
@@ -98,7 +80,9 @@ exports.joinIndex = (req, res, next) => {
 
 exports.join = async (req, res, next) => {
   try {
-    if (req.session.user) { return goToChat(req, res); }
+    if (req.session.user) {
+      return routing.goToChat(req, res);
+    }
 
     const userFound = await db.users.findUser(req.body.username);
 
@@ -113,12 +97,10 @@ exports.join = async (req, res, next) => {
         }
       );
     } else {
-      const newUser = await db.users.addUser({
-        ...req.body,
-        password: await securePassword(req.body.password),
-      });
+      const securePassword = await bcrypt.hash(req.body.password, await bcrypt.genSalt(10));
+      const newUser = await db.users.addUser({...req.body, password: securePassword});
 
-      goToChat(req, res, newUser);
+      routing.goToChat(req, res, newUser);
     }
   } catch (error) {
     next(new ServerError(error));

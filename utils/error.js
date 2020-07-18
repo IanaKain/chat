@@ -4,6 +4,7 @@ class ServerError extends Error {
     const message = description
       ? `${error.message || 'Something went wrong'} ${description}`
       : `${error.message || 'Something went wrong'}`;
+
     this.name = error.name || 'ServerError';
     this.code = error.code;
     this.status = error.status || 500;

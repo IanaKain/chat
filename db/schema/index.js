@@ -1,42 +1,42 @@
 const userSchema = {
-  bsonType: "object",
-  required: ["username", "password", "room"],
+  bsonType: 'object',
+  required: ['username', 'password', 'room'],
   properties: {
     username: {
-      bsonType: "string",
-      description: "username is required"
+      bsonType: 'string',
+      description: 'username is required',
     },
     password: {
-      bsonType: "string",
-      description: "password is required"
+      bsonType: 'string',
+      description: 'password is required',
     },
     room: {
-      bsonType: "string",
+      bsonType: 'string',
     },
-  }
+  },
 };
 
 const messageSchema = {
-  bsonType: "object",
-  required: ["role", "userId", "username", "text", "createTime"],
+  bsonType: 'object',
+  required: ['role', 'userId', 'username', 'text', 'createTime'],
   properties: {
     role: {
-      bsonType: "string",
-      description: "role is required"
+      bsonType: 'string',
+      description: 'role is required',
     },
     userId: {
-      bsonType: "string",
-      description: "userId is required"
+      bsonType: 'string',
+      description: 'userId is required',
     },
     username: {
-      bsonType: "string",
-      description: "username is required"
+      bsonType: 'string',
+      description: 'username is required',
     },
     createTime: {
-      bsonType: "string",
-      description: "text is required"
+      bsonType: 'string',
+      description: 'text is required',
     },
-  }
+  },
 };
 
 exports.schema = {

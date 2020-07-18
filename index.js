@@ -6,17 +6,18 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const logger = require('./utils/logger')(module);
 const http = require('http');
 const socketio = require('socket.io');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
-const routes = require('./routes');
 const dotenv = require('dotenv').config();
-if (dotenv.error) { throw dotenv.error }
+const routes = require('./routes');
+const logger = require('./utils/logger')(module);
+
+if (dotenv.error) { throw dotenv.error; }
 
 const {client} = require('./db/client');
-const { ServerError } = require('./utils/error');
+const {ServerError} = require('./utils/error');
 const config = require('./config/config');
 
 client.connect().then(() => {
@@ -30,10 +31,13 @@ const server = http.createServer(app);
 const io = socketio(server, config.socket); // todo add logger -> winston to options
 
 const db = require('./db/index').collections();
+
 const chat = io.of('/chat');
 const socketEvents = require('./config/socketEvents.json');
-const sessionStore = new MongoStore({ url: config.db.connectionStr });
+
+const sessionStore = new MongoStore({url: config.db.connectionStr});
 const communicator = require('./utils/communication').createCommunication(app, chat);
+
 const communicate = communicator();
 const formatMessage = require('./utils/messages');
 const sendInvite = require('./utils/mail');
@@ -42,10 +46,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(morgan(app.get('env') === 'development' ? 'dev' : 'default'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-app.use(express.json({ type: ['application/json', 'text/plain'] }));
+app.use(express.json({type: ['application/json', 'text/plain']}));
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // goes after cookieParser, when cookies are read and ready
@@ -94,23 +99,25 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   if (app.get('env') === 'development') {
     const errorHandler = errorhandler();
+
     errorHandler(err, req, res, next);
   } else {
     res.status(500).end();
   }
 });
 
-chat.use(function(socket, next) {
+chat.use((socket, next) => {
   const handshakeData = socket.request;
   const handshakeCookie = cookie.parse(handshakeData.headers.cookie || '');
   const sidCookie = cookieParser.signedCookie(handshakeCookie[config.session.key], config.session.secret);
 
-  sessionStore.load(sidCookie, (error, session) => {
+  sessionStore.load(sidCookie, (error, storeSession) => {
     if (error) { next(new ServerError(error, 'User is not authorized.')); }
-    if (!session || !session.user) {
+    if (!storeSession || !storeSession.user) {
       next(new ServerError(error, 'User is not authorized.'));
     } else {
-      socket.handshake.user = session.user;
+      // eslint-disable-next-line
+      socket.handshake.user = storeSession.user;
       next();
     }
   });
@@ -119,16 +126,17 @@ chat.use(function(socket, next) {
 let onceConnected = [];
 
 chat.on(socketEvents.connection, async (socket) => {
-  const { user } = socket.handshake;
+  const {user} = socket.handshake;
 
   try {
     communicate.setSocket(socket);
     socket.join(user.room);
 
     const messages = await db.chat.getRoomMessages(user.room, user.userId);
+
     communicate.sendHistory(messages);
 
-    if (!onceConnected.find(id => id === user.userId)) {
+    if (!onceConnected.find((id) => id === user.userId)) {
       onceConnected.push(user.userId);
       communicate.sendWelcomeMsg();
       communicate.informUserConnected();
@@ -146,9 +154,9 @@ chat.on(socketEvents.connection, async (socket) => {
     });
 
     socket.on(socketEvents.sendInvite, (receivers, cb) => {
-      sendInvite({ from: user.username, to: receivers, link: socket.handshake.headers.origin })
+      sendInvite({from: user.username, to: receivers, link: socket.handshake.headers.origin})
         .then(cb)
-        .catch(error => communicate.toSender(socketEvents.sendInviteResult, error.message));
+        .catch((error) => communicate.toSender(socketEvents.sendInviteResult, error.message));
     });
 
     socket.on(socketEvents.uploadFile, async (file) => {
@@ -164,14 +172,14 @@ chat.on(socketEvents.connection, async (socket) => {
 
     socket.on(socketEvents.editMessage, async (messageId, message) => {
       db.chat.editMessage(messageId, message)
-        .then((newMessage) => { communicate.sendUpdatedMessage(newMessage, socket) })
+        .then((newMessage) => { communicate.sendUpdatedMessage(newMessage, socket); })
         .catch((error) => console.warn(error.message));
     });
 
     socket.on(socketEvents.deleteMessage, async (messageId) => {
-        db.chat.deleteMessage(messageId)
-          .then(() => socket.emit(socketEvents.deleteMessageSuccess, messageId))
-          .catch((error) => console.warn(error.message));
+      db.chat.deleteMessage(messageId)
+        .then(() => socket.emit(socketEvents.deleteMessageSuccess, messageId))
+        .catch((error) => console.warn(error.message));
     });
 
     socket.on(socketEvents.disconnect, async (data) => {
@@ -180,7 +188,7 @@ chat.on(socketEvents.connection, async (socket) => {
 
         if (isDisconnected) {
           logger.info(`User ${user.username} disconnected ${data}`);
-          onceConnected = onceConnected.filter(id => id !== user.userId);
+          onceConnected = onceConnected.filter((id) => id !== user.userId);
           communicate.sendUsersList();
           communicate.informUserDisconnected();
           communicate.removeSocket();
