@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const {MongoClient} = require('mongodb');
 const config = require('../config/config');
 
 class Client {
@@ -25,4 +25,4 @@ class Client {
 
 const client = new Client();
 
-module.exports = { client };
+module.exports = {client};
