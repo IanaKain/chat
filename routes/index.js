@@ -9,7 +9,7 @@ const findAndAuthorize = async (fromData) => {
   const userFound = await db.users.findUser(fromData.username);
 
   if (userFound) {
-    const isAuthorized = Boolean(await bcrypt.compare(userFound, fromData.password));
+    const isAuthorized = Boolean(await bcrypt.compare(fromData.password, userFound.password));
 
     if (isAuthorized) {
       return {...fromData, ...userFound};
@@ -97,7 +97,8 @@ exports.join = async (req, res, next) => {
         }
       );
     } else {
-      const securePassword = await bcrypt.hash(req.body.password, await bcrypt.genSalt(10));
+      const salt = await bcrypt.genSalt(10);
+      const securePassword = bcrypt.hash(req.body.password, salt);
       const newUser = await db.users.addUser({...req.body, password: securePassword});
 
       routing.goToChat(req, res, newUser);
