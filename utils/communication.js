@@ -100,25 +100,25 @@ class ServerCommunication {
 
   sendMessage = (msg, socket) => {
     const isOwner = this.isOwner(socket);
-    const message = {...msg, role: isOwner ? 'owner' : 'peer'};
 
-    this.server.render(config.templates.history, {messages: [message]}, (err, html) => {
-      if (isOwner) {
-        this.toAllInRoomExceptSender(socketEvents.renderPeerMessage, html);
-        this.toSender(socketEvents.renderOwnerMessage, html);
-      } else {
-        socket.to(socket.handshake.user.room).emit(socketEvents.renderPeerMessage, html);
-        socket.emit(socketEvents.renderOwnerMessage, html);
-      }
+    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'peer' : 'owner'}]}, (err, html) => {
+      this.toAllInRoomExceptSender(socketEvents.renderPeerMessage, html);
+      // socket.to(socket.handshake.user.room).emit(socketEvents.renderPeerMessage, html);
+    });
+    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'owner' : 'peer'}]}, (err, html) => {
+      this.toSender(socketEvents.renderOwnerMessage, html);
+      // socket.emit(socketEvents.renderOwnerMessage, html);
     });
   };
 
   sendUpdatedMessage = (msg, socket) => {
     const isOwner = this.isOwner(socket);
-    const message = {...msg, role: isOwner ? 'owner' : 'peer'};
 
-    this.server.render(config.templates.history, {messages: [message]}, (err, html) => {
+    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'peer' : 'owner'}]}, (err, html) => {
       this.toAllInRoomExceptSender(socketEvents.editMessageSuccess, html);
+    });
+
+    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'owner' : 'peer'}]}, (err, html) => {
       this.toSender(socketEvents.editMessageSuccess, html);
     });
   };
