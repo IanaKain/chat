@@ -98,28 +98,21 @@ class ServerCommunication {
     }
   };
 
-  sendMessage = (msg, socket) => {
+  sendMessage = (msg, socket, {add, update, remove}) => {
     const isOwner = this.isOwner(socket);
+    const event = (add && socketEvents.renderMessage)
+      || (update && socketEvents.editMessageSuccess);
+
+    if (remove) {
+      this.toSender(socketEvents.deleteMessageSuccess, msg);
+      this.toAllInRoomExceptSender(socketEvents.deleteMessageSuccess, msg);
+    }
 
     this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'peer' : 'owner'}]}, (err, html) => {
-      this.toAllInRoomExceptSender(socketEvents.renderPeerMessage, html);
-      // socket.to(socket.handshake.user.room).emit(socketEvents.renderPeerMessage, html);
+      this.toAllInRoomExceptSender(event, html);
     });
     this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'owner' : 'peer'}]}, (err, html) => {
-      this.toSender(socketEvents.renderOwnerMessage, html);
-      // socket.emit(socketEvents.renderOwnerMessage, html);
-    });
-  };
-
-  sendUpdatedMessage = (msg, socket) => {
-    const isOwner = this.isOwner(socket);
-
-    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'peer' : 'owner'}]}, (err, html) => {
-      this.toAllInRoomExceptSender(socketEvents.editMessageSuccess, html);
-    });
-
-    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'owner' : 'peer'}]}, (err, html) => {
-      this.toSender(socketEvents.editMessageSuccess, html);
+      this.toSender(event, html);
     });
   };
 }

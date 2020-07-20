@@ -88,9 +88,6 @@ select {
   box-sizing: border-box;
   padding-left: 8px;
 }
-.form-button {
-  padding: 58px 0 0;
-}
 .form-button input[type=submit] {
   width: 100%;
   background-color: #435f7a;
@@ -196,7 +193,7 @@ select {
   text-transform: capitalize;
   letter-spacing: 0.8px;
 }
-.chat-header__room-name .fa.fa-comment {
+.chat-header__room-name .fa.fa-comment-o {
   margin-left: 20px;
   color: #f5f5f5;
 }
@@ -257,30 +254,41 @@ select {
 #chat-invite-form {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 .form-item.chat-invite-form {
-  width: 92%;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 12px 0 0;
 }
 .form-item.chat-invite-form #email {
-  width: 74%;
+  width: 80%;
   padding-left: 8px;
+  background: transparent;
+  border-color: #f5f5f5;
+}
+.form-item.chat-invite-form #email::placeholder {
+/* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #f5f5f5;
+  opacity: 1; /* Firefox */
+}
+.form-item.chat-invite-form #email:-ms-input-placeholder {
+/* Internet Explorer 10-11 */
+  color: #f5f5f5;
+}
+.form-item.chat-invite-form #email::-ms-input-placeholder {
+/* Microsoft Edge */
+  color: #f5f5f5;
 }
 .form-item.chat-invite-form .fa.fa-user-o {
   margin-right: 12px;
   color: #f5f5f5;
   font-size: 24px;
-}
-.form-item.chat-invite-form .form-button-invite {
-  width: 32px;
-  height: 28px;
-  margin-left: 8px;
-  position: relative;
-  cursor: pointer;
 }
 .form-item.chat-invite-form #invite-confirmation {
   position: absolute;
@@ -307,6 +315,13 @@ select {
 }
 .form-item.chat-invite-form .fa.fa-envelope-o {
   font-size: 26px;
+  cursor: pointer;
+}
+.form-item.chat-invite-form #send-invite-btn {
+  width: 32px;
+  margin: 0 10px 0;
+  padding: 0;
+  position: relative;
   cursor: pointer;
 }
 .form-item.chat-invite-form .actions {
@@ -443,43 +458,58 @@ select {
   padding: 0;
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  background: #32465a;
 }
-#chat-form .form-item input {
-  width: 100%;
-  height: 100%;
+#chat-form .form-item #message {
+  width: 90%;
+  height: 68%;
   padding: 0 20px;
   font-size: 18px;
-  border: none;
-  background: transparent;
+  border: 1px solid #fff;
+  background: #e6eaea;
   box-sizing: border-box;
   box-shadow: none;
   outline: none;
 }
-#chat-form .form-item.form-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100px;
-  margin: 0;
-  background: #32465a;
+#chat-form .form-item #message::placeholder {
+/* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #32465a;
+  opacity: 1; /* Firefox */
 }
-#chat-form .form-item.form-button button {
-  background: transparent;
-  border: none;
-  width: 100%;
-  height: 100%;
+#chat-form .form-item #message:-ms-input-placeholder {
+/* Internet Explorer 10-11 */
+  color: #32465a;
+}
+#chat-form .form-item #message::-ms-input-placeholder {
+/* Microsoft Edge */
+  color: #32465a;
+}
+#chat-form .message-actions {
+  display: flex;
+  margin-left: 10px;
+}
+#chat-form #send-message-btn {
   padding: 0;
   margin: 0;
+  border: 0;
+  background: transparent;
   box-sizing: border-box;
   box-shadow: none;
   outline: none;
   cursor: pointer;
 }
-#chat-form .form-item.form-button .fa.fa-paper-plane {
+#chat-form .fa.fa-smile-o {
   color: #f5f5f5;
   font-size: 26px;
 }
-#chat-form .form-item.form-button .fa.fa-paperclip {
+#chat-form .fa.fa-paper-plane-o {
+  color: #f5f5f5;
+  font-size: 26px;
+}
+#chat-form .fa.fa-paperclip {
   color: #f5f5f5;
   font-size: 30px;
   -webkit-transform: rotate(45deg);
@@ -495,7 +525,6 @@ select {
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  border-left: 2px solid #f5f5f5;
   cursor: pointer;
 }
 #chat-form #file {

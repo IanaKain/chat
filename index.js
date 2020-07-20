@@ -149,7 +149,7 @@ chat.on(socketEvents.connection, async (socket) => {
 
     socket.on(socketEvents.sendMessage, (msg) => {
       db.chat.addMessage(formatMessage({text: msg}, user).peer())
-        .then((message) => communicate.sendMessage(message, socket))
+        .then((message) => communicate.sendMessage(message, socket, {add: true}))
         .catch((error) => console.warn(error.message));
     });
 
@@ -160,25 +160,25 @@ chat.on(socketEvents.connection, async (socket) => {
     });
 
     socket.on(socketEvents.uploadFile, async (file) => {
-      base64Img.img(file, './public/images', Date.now(), (err, filePath) => {
+      base64Img.img(file, './public/upload', Date.now(), (err, filePath) => {
         const arrPath = filePath.split('/');
         const fileName = arrPath[arrPath.length - 1];
 
         db.chat.addMessage(formatMessage({imgSrc: `../images/${fileName}`}, user).peer())
-          .then((message) => communicate.sendMessage(message, socket))
+          .then((message) => communicate.sendMessage(message, socket, {add: true}))
           .catch((error) => console.warn(error.message));
       });
     });
 
     socket.on(socketEvents.editMessage, async (messageId, message) => {
       db.chat.editMessage(messageId, message)
-        .then((newMessage) => { communicate.sendUpdatedMessage(newMessage, socket); })
+        .then((newMessage) => { communicate.sendMessage(newMessage, socket, {update: true}); })
         .catch((error) => console.warn(error.message));
     });
 
     socket.on(socketEvents.deleteMessage, async (messageId) => {
       db.chat.deleteMessage(messageId)
-        .then(() => socket.emit(socketEvents.deleteMessageSuccess, messageId))
+        .then(() => communicate.sendMessage(messageId, socket, {remove: true}))
         .catch((error) => console.warn(error.message));
     });
 

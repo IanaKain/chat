@@ -24,6 +24,12 @@ const disconnect = () => {
   window.location.href = '/logout';
 };
 
+const picker = new EmojiButton();
+
+picker.on('emoji', (emoji) => {
+  document.querySelector('input').value += emoji;
+});
+
 const renderHTML = (html) => {
   if (html) {
     const messageBlock = document.getElementById('chat-message-block');
@@ -62,6 +68,12 @@ socket
       .getElementById('chat-message-block')
       .appendChild(demoImage);
   })
+  .on(socketEvents.renderMessage, (html) => {
+    const chatMsgBlock = document.querySelector('.chat-messages');
+
+    renderHTML(html);
+    chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
+  })
   .on(socketEvents.renderMessageHistory, (html) => { document.getElementById('history-message-block').innerHTML = html; })
   .on(socketEvents.deleteMessageSuccess, (messageId) => {
     const element = document.getElementById(messageId);
@@ -78,18 +90,6 @@ socket
 
     messageIdInEditMode = null;
   });
-
-// eslint-disable-next-line
-for (const type in senderTypes) {
-  ((sender) => {
-    const chatMsgBlock = document.querySelector('.chat-messages');
-
-    socket.on(`${socketEvents.renderMessageHistory}:${sender}`, (html) => {
-      renderHTML(html);
-      chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
-    });
-  })(senderTypes[type]);
-}
 
 function onKeyDownNotEnter() {
   const timeoutFunction = () => {
@@ -112,6 +112,10 @@ window.onload = function () {
   const textInput = document.getElementById('message');
   const inviteForm = document.getElementById('chat-invite-form');
   const inputUpload = document.getElementById('file');
+
+  // textInput.addEventListener('click', () => {
+  //   picker.showPicker();
+  // });
 
   inputUpload.addEventListener('change', ({target}) => {
     const reader = new FileReader();
