@@ -27,7 +27,7 @@ const disconnect = () => {
 const picker = new EmojiButton();
 
 picker.on('emoji', (emoji) => {
-  document.querySelector('input').value += emoji;
+  document.querySelector('textarea').value += emoji;
 });
 
 const renderHTML = (html) => {
@@ -91,6 +91,10 @@ socket
     messageIdInEditMode = null;
   });
 
+function toggleEmojiPicker() {
+  picker.pickerVisible ? picker.hidePicker() : picker.showPicker();
+}
+
 function autoGrow({target}) {
   const element = target;
 
@@ -134,10 +138,9 @@ window.onload = function () {
   const textInput = document.getElementById('message');
   const inviteForm = document.getElementById('chat-invite-form');
   const inputUpload = document.getElementById('file');
+  const emojiPicker = document.getElementById('emoji-picker');
 
-  // textInput.addEventListener('click', () => {
-  //   picker.showPicker();
-  // });
+  emojiPicker.addEventListener('click', toggleEmojiPicker);
 
   inputUpload.addEventListener('change', ({target}) => {
     const reader = new FileReader();

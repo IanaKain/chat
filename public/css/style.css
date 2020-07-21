@@ -16,6 +16,11 @@ h1 {
   font-weight: 400;
   font-size: 26px;
 }
+.emoji-picker {
+  position: absolute;
+  bottom: 10%;
+  right: 1%;
+}
 .container-page__login-page,
 .container-page__chat-page {
   margin: 0 auto;
