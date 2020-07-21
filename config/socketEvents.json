@@ -13,9 +13,8 @@
   "sendInviteResult": "email:result",
   "renderUsers": "html:users",
   "renderMessageHistory": "html:message",
+  "renderMessage": "html:message:add",
   "renderAdminMessage": "html:message:admin",
-  "renderOwnerMessage": "html:message:owner",
-  "renderPeerMessage": "html:message:peer",
   "renderPrivateMessage": "html:message:private",
   "uploadFile": "file:upload",
   "uploadFileResult": "file:upload:result"

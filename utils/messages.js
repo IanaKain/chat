@@ -11,7 +11,7 @@ const userMessage = (user) => ({
   role: null,
   text: null,
   imgSrc: null,
-  createTime: moment().calendar(Date.now()),
+  createTime: moment(Date.now()).format('HH:mm'),
   updateTime: null,
 });
 
@@ -20,7 +20,7 @@ const adminMessage = (msg) => ({
   role: ADMIN,
   userId: ADMIN,
   username: ADMIN,
-  createTime: moment().calendar(Date.now()),
+  createTime: moment(Date.now()).format('HH:mm'),
   updateTime: null,
 });
 

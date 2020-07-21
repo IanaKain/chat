@@ -24,6 +24,12 @@ const disconnect = () => {
   window.location.href = '/logout';
 };
 
+const picker = new EmojiButton();
+
+picker.on('emoji', (emoji) => {
+  document.querySelector('input').value += emoji;
+});
+
 const renderHTML = (html) => {
   if (html) {
     const messageBlock = document.getElementById('chat-message-block');
@@ -62,6 +68,12 @@ socket
       .getElementById('chat-message-block')
       .appendChild(demoImage);
   })
+  .on(socketEvents.renderMessage, (html) => {
+    const chatMsgBlock = document.querySelector('.chat-messages');
+
+    renderHTML(html);
+    chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
+  })
   .on(socketEvents.renderMessageHistory, (html) => { document.getElementById('history-message-block').innerHTML = html; })
   .on(socketEvents.deleteMessageSuccess, (messageId) => {
     const element = document.getElementById(messageId);
@@ -79,31 +91,41 @@ socket
     messageIdInEditMode = null;
   });
 
-// eslint-disable-next-line
-for (const type in senderTypes) {
-  ((sender) => {
-    const chatMsgBlock = document.querySelector('.chat-messages');
+function autoGrow({target}) {
+  const element = target;
 
-    socket.on(`${socketEvents.renderMessageHistory}:${sender}`, (html) => {
-      renderHTML(html);
-      chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
-    });
-  })(senderTypes[type]);
+  element.style.height = `${element.scrollHeight}px`;
 }
 
-function onKeyDownNotEnter() {
-  const timeoutFunction = () => {
-    typing = false;
-    socket.emit(socketEvents.typeEnd);
-  };
+function onKeyDownNotEnter(event) {
+  const element = event.target;
+  const value = element.value.trim();
 
-  if (!typing) {
-    typing = true;
-    socket.emit(socketEvents.typeStart);
-    timeout = setTimeout(timeoutFunction, 1000);
+  if (event.key === 'Enter' && !event.shiftKey && value) {
+    event.preventDefault();
+
+    if (messageIdInEditMode) {
+      socket.emit(socketEvents.editMessage, messageIdInEditMode, value);
+    } else {
+      socket.emit(socketEvents.sendMessage, value);
+      element.value = '';
+      element.style.height = '34px';
+      element.focus();
+    }
   } else {
-    clearTimeout(timeout);
-    timeout = setTimeout(timeoutFunction, 1000);
+    const timeoutFunction = () => {
+      typing = false;
+      socket.emit(socketEvents.typeEnd);
+    };
+
+    if (!typing) {
+      typing = true;
+      socket.emit(socketEvents.typeStart);
+      timeout = setTimeout(timeoutFunction, 1000);
+    } else {
+      clearTimeout(timeout);
+      timeout = setTimeout(timeoutFunction, 1000);
+    }
   }
 }
 
@@ -113,6 +135,10 @@ window.onload = function () {
   const inviteForm = document.getElementById('chat-invite-form');
   const inputUpload = document.getElementById('file');
 
+  // textInput.addEventListener('click', () => {
+  //   picker.showPicker();
+  // });
+
   inputUpload.addEventListener('change', ({target}) => {
     const reader = new FileReader();
 
@@ -121,6 +147,7 @@ window.onload = function () {
   });
 
   textInput.addEventListener('keydown', onKeyDownNotEnter);
+  textInput.addEventListener('keyup', autoGrow);
 
   chatForm.addEventListener('submit', (event) => {
     event.preventDefault();

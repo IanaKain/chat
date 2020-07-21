@@ -9,7 +9,7 @@ block content
           .chat-header
             .chat-header__room-name
               .room-name= room
-              i.fa.fa-comment
+              i.fa.fa-comment-o
 
           .chat-content
             .chat-content-inner
@@ -20,17 +20,15 @@ block content
           .chat-footer
             form#chat-invite-form
               .form-item.chat-invite-form
-                i.fa.fa-user-o
+                button#send-invite-btn.actions(type='submit')
+                  i.fa.fa-envelope-o
+                #invite-confirmation
                 input#email(
                   required
                   type='email'
                   name='email'
                   placeholder='Enter email...'
                 )
-                .form-button-invite
-                  button#send-invite-btn.actions(type='submit')
-                    i.fa.fa-envelope-o
-                  #invite-confirmation
         .chat-right-side
           .chat-header
             .header__user-data= username
@@ -51,20 +49,22 @@ block content
           .chat-footer
             form#chat-form
               .form-item
-                input#message(
+                textarea#message(
                   required
                   type='text'
                   name='message'
                   placeholder='Enter message...'
                 )
-              .form-item.form-button
-                button#send-message-btn(type='submit')
-                  i.fa.fa-paper-plane
-                .form-item.form-upload
+                .message-actions
+                  i.fa.fa-smile-o
                   form#upload-file
                     label.attach-file(for='file')
                       i.fa.fa-paperclip
                       input(type='file' id='file' name='file')
+                  button#send-message-btn(type='submit')
+                    i.fa.fa-paper-plane-o
+
+
 
 block body_end
   script

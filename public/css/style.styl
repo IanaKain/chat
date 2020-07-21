@@ -96,8 +96,8 @@ form
   box-sizing: border-box
   padding-left: 8px
 
-.form-button
-  padding: 58px 0 0;
+//.form-button
+//  padding: 58px 0 0;
 
 .form-button input[type=submit]
   width: 100%;
@@ -206,7 +206,7 @@ select
     text-transform: capitalize;
     letter-spacing: 0.8px;
 
-  .fa.fa-comment
+  .fa.fa-comment-o
     margin-left: 20px;
     color: color-light-base;
 
@@ -241,8 +241,8 @@ select
 
 .chat-footer
   flex-shrink: 0;
-  height: 60px;
   background: color-dark-base;
+  padding: 12px;
 
 .chat-content-inner
   width: 80%;
@@ -267,30 +267,41 @@ select
 #chat-invite-form
   margin: 0;
   padding: 0;
+  height: 100%;
 
 .form-item.chat-invite-form
-  width: 92%;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
-  padding: 12px 0 0;
 
   #email
-    width: 74%;
+    width: 80%;
     padding-left: 8px;
+    background: transparent;
+    border-color: color-light-base;
+
+    &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: color-light-base;
+      opacity: 1; /* Firefox */
+    }
+
+    &:-ms-input-placeholder { /* Internet Explorer 10-11 */
+      color: color-light-base;
+    }
+
+    &::-ms-input-placeholder { /* Microsoft Edge */
+      color: color-light-base;
+    }
 
   .fa.fa-user-o
     margin-right: 12px;
     color: color-light-base;
     font-size: 24px;
-
-  .form-button-invite
-    width: 32px;
-    height: 28px;
-    margin-left: 8px;
-    position: relative;
-    cursor: pointer;
 
   #invite-confirmation
     position: absolute;
@@ -317,6 +328,13 @@ select
 
   .fa.fa-envelope-o
     font-size: 26px;
+    cursor: pointer;
+
+  #send-invite-btn
+    width: 32px;
+    margin: 0 10px 0;
+    padding: 0;
+    position: relative;
     cursor: pointer;
 
   .actions
@@ -439,8 +457,9 @@ select
   text-align: center;
 
 #chat-form
+  position: relative;
   width: 100%;
-  height: 100%;
+  //height: 100%;
   margin: 0;
   display: flex;
   flex-direction: row;
@@ -452,51 +471,76 @@ select
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100%;
+    //height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    background: color-dark-base;
 
-    input
+    #message
       width: 100%
-      height: 100%
-      padding: 0 20px
+      min-height: 34px;
+      height: 34px;
+      max-height: 200px;
+      margin: 0 auto;
+      padding: 4px 128px 0 14px;
       font-size: 18px
-      border: none
-      background: transparent
+      border: 1px solid white
+      background: color-light-body
       box-sizing: border-box
       box-shadow: none
       outline: none
+      //overflow:hidden;
+      display: block;
+      resize: none;
 
-  .form-item.form-button
-    display: flex;
-    align-items: center;
-    justify-content: center;
+      &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+        color: color-dark-base;
+        opacity: 1; /* Firefox */
+      }
+
+      &:-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: color-dark-base;
+      }
+
+      &::-ms-input-placeholder { /* Microsoft Edge */
+        color: color-dark-base;
+      }
+
+  .message-actions
+    position: absolute;
     width: 100px;
+    right: 16px;
+    bottom: 6px;
+    display flex;
+    justify-content: space-between;
+
+  #send-message-btn
+    padding: 0;
     margin: 0;
-    background: color-dark-base;
+    border: 0;
+    background: transparent;
+    box-sizing: border-box;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
 
-    button
-      background: transparent;
-      border: none;
-      width: 100%;
-      height: 100%;
-      padding: 0;
-      margin: 0;
-      box-sizing: border-box;
-      box-shadow: none;
-      outline: none;
-      cursor: pointer;
+  .fa.fa-smile-o
+    color: color-dark-base;
+    font-size: 24px;
 
-    .fa.fa-paper-plane
-      color: color-light-base;
-      font-size: 26px;
+  .fa.fa-paperclip
+    color: color-dark-base;
+    font-size: 24px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
 
-    .fa.fa-paperclip
-      color: color-light-base;
-      font-size: 30px;
-      -webkit-transform: rotate(45deg);
-      -moz-transform: rotate(45deg);
-      -ms-transform: rotate(45deg);
-      -o-transform: rotate(45deg);
-      transform: rotate(45deg);
+  .fa.fa-paper-plane-o
+    color: color-dark-base;
+    font-size: 22px;
 
   .attach-file
     height: 100%;
@@ -505,7 +549,6 @@ select
     justify-content: center;
     flex-direction: column;
     align-items: center;
-    border-left: 2px solid color-light-base;
     cursor: pointer;
 
   #file
@@ -571,3 +614,87 @@ select
 {
   to { width: 1.3em; }
 }
+
+// Chat message
+
+.chat-message-wrapper
+  display flex
+
+.chat-message
+  display: inline-block;
+  max-width 450px
+
+.chat-message-header
+  display: flex;
+  margin-bottom 4px
+  font-size 14px
+
+.chat-message:hover
+  .chat-message-actions
+    visibility visible
+
+.chat-message-user-info
+  font-weight bold
+  margin: 0 10px 0 16px
+
+.chat-message-body
+  min-width: 130px;
+  padding: 12px 16px;
+  border-radius: 16px;
+
+.chat-message-uploaded-img
+  img
+    max-width: 100%;
+
+.chat-message-footer
+  margin: 0 10px
+  display: flex;
+  justify-content flex-end;
+  align-items: center;
+
+.chat-message-actions
+  visibility hidden
+
+.chat-message-date
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(0,0,0,.7)
+
+.edit-message-btn,
+.delete-message-btn
+  font-size 16px
+  color: rgba(0,0,0,.7)
+  &::hover {
+    color: rgba(0,0,0,.1)
+  }
+
+
+.icon-btn
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+
+.chat-message-wrapper_peer
+
+  .chat-message
+    margin: 10px auto 10px 8px;
+
+  .chat-message-body
+    color: color-dark-base;
+    background: color-light-base;
+    box-shadow: 0 0 2px 0 color-dark-base;
+    border-bottom-left-radius: 0;
+
+
+.chat-message-wrapper_owner
+
+  .chat-message
+    margin: 10px 8px 10px auto;
+
+  .chat-message-body
+    color: color-light-base;
+    background: color-dark-base;
+    box-shadow: 0 0 2px 0 color-dark-content;
+    border-bottom-right-radius: 0;
+
