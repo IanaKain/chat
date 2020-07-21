@@ -91,19 +91,41 @@ socket
     messageIdInEditMode = null;
   });
 
-function onKeyDownNotEnter() {
-  const timeoutFunction = () => {
-    typing = false;
-    socket.emit(socketEvents.typeEnd);
-  };
+function autoGrow({target}) {
+  const element = target;
 
-  if (!typing) {
-    typing = true;
-    socket.emit(socketEvents.typeStart);
-    timeout = setTimeout(timeoutFunction, 1000);
+  element.style.height = `${element.scrollHeight}px`;
+}
+
+function onKeyDownNotEnter(event) {
+  const element = event.target;
+  const value = element.value.trim();
+
+  if (event.key === 'Enter' && !event.shiftKey && value) {
+    event.preventDefault();
+
+    if (messageIdInEditMode) {
+      socket.emit(socketEvents.editMessage, messageIdInEditMode, value);
+    } else {
+      socket.emit(socketEvents.sendMessage, value);
+      element.value = '';
+      element.style.height = '34px';
+      element.focus();
+    }
   } else {
-    clearTimeout(timeout);
-    timeout = setTimeout(timeoutFunction, 1000);
+    const timeoutFunction = () => {
+      typing = false;
+      socket.emit(socketEvents.typeEnd);
+    };
+
+    if (!typing) {
+      typing = true;
+      socket.emit(socketEvents.typeStart);
+      timeout = setTimeout(timeoutFunction, 1000);
+    } else {
+      clearTimeout(timeout);
+      timeout = setTimeout(timeoutFunction, 1000);
+    }
   }
 }
 
@@ -125,6 +147,7 @@ window.onload = function () {
   });
 
   textInput.addEventListener('keydown', onKeyDownNotEnter);
+  textInput.addEventListener('keyup', autoGrow);
 
   chatForm.addEventListener('submit', (event) => {
     event.preventDefault();

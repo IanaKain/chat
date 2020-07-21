@@ -1,17 +1,20 @@
 for item in messages || []
-  div(id=item._id class=`chat-message-block__message ${item.role}`)
-    .message__user-info
-      .message__user-name= item.username
-        .message__date= item.updateTime ? `Updated ${item.updateTime}` : item.createTime
-    if item.imgSrc
-      .message__user-img
-        img(src=`${item.imgSrc}`)
-    else
-      .message__user-content= item.text
-    if item.role === 'owner'
-      .message__user-actions
-        if !item.imgSrc
-          button.edit-message-btn(type='button', onclick="editMessage('" + item._id + "')")
-            i.fa.fa-pencil-square-o
-        button.delete-message-btn(type='button', onclick="deleteMessage('" + item._id + "')")
-          i.fa.fa-trash-o
+  div(id=item._id class=`chat-message-wrapper chat-message-wrapper_${item.role}`)
+    .chat-message
+      .chat-message-header
+        .chat-message-user-info= item.username
+        .chat-message-date(title=item.updateTime ? item.updateTime: item.createTime)= item.updateTime ? `Edited ${item.updateTime}` : item.createTime
+      .chat-message-body
+        if item.imgSrc
+          .chat-message-uploaded-img
+            img(src=`${item.imgSrc}`)
+        else
+          .chat-message-text= item.text
+      .chat-message-footer
+        if item.role === 'owner'
+          .chat-message-actions
+            if !item.imgSrc
+              button.icon-btn.edit-message-btn(type='button', onclick="editMessage('" + item._id + "')")
+                i.fa.fa-pencil-square-o
+            button.icon-btn.delete-message-btn(type='button', onclick="deleteMessage('" + item._id + "')")
+              i.fa.fa-trash-o

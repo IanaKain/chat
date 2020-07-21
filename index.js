@@ -164,7 +164,7 @@ chat.on(socketEvents.connection, async (socket) => {
         const arrPath = filePath.split('/');
         const fileName = arrPath[arrPath.length - 1];
 
-        db.chat.addMessage(formatMessage({imgSrc: `../images/${fileName}`}, user).peer())
+        db.chat.addMessage(formatMessage({imgSrc: `../upload/${fileName}`}, user).peer())
           .then((message) => communicate.sendMessage(message, socket, {add: true}))
           .catch((error) => console.warn(error.message));
       });
