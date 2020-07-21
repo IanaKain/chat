@@ -1,11 +1,6 @@
 let typing = false;
 let timeout;
 let messageIdInEditMode = null;
-const senderTypes = {
-  admin: 'admin',
-  owner: 'owner',
-  peer: 'peer',
-};
 
 const socket = io('/chat', {
   transports: ['websocket'],
