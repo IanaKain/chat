@@ -14,13 +14,16 @@ class Chat {
 
   async getRoomMessages(room, userId) {
     const collection = client.db().collection(this.collectionName);
-    const includeFields = {userId: 1, username: 1, text: 1, createTime: 1, updateTime: 1, imgSrc: 1};
-    const addField = {role: {$cond: {if: {$eq: ['$userId', userId]}, then: 'owner', else: 'peer'}}};
+    const includeFields = {userId: 1, username: 1, text: 1, updateTime: 1, imgSrc: 1};
 
     try {
       const results = await collection.aggregate([
         {$match: {room}},
-        {$project: {...includeFields, ...addField}}
+        {$project: {
+          ...includeFields,
+          role: {$cond: {if: {$eq: ['$userId', userId]}, then: 'owner', else: 'peer'}},
+        }},
+        {$addFields: {createTime: {$toDate: '$_id'}}}
       ]).toArray();
 
       return results;
@@ -38,7 +41,7 @@ class Chat {
 
       logger.info(`Message inserted into db. ${Object.keys(result)}`);
 
-      return {...data, _id: result.insertedId};
+      return {...data, _id: result.insertedId, createTime: result.insertedId.getTimestamp()};
     } catch (error) {
       logger.warn(`Cannot add message. ${error.message}`);
       throw error;

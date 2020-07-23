@@ -3,7 +3,9 @@ for item in messages || []
     .chat-message
       .chat-message-header
         .chat-message-user-info= item.username
-        .chat-message-date(title=item.updateTime ? item.updateTime: item.createTime)= item.updateTime ? `Edited ${item.updateTime}` : item.createTime
+        - const updated = item.updateTime && new Date(item.updateTime).toLocaleTimeString();
+        - const created = new Date(item.createTime).toLocaleTimeString();
+        .chat-message-date(title=updated ? updated : created)= updated ? `Edited ${updated}` : created
       .chat-message-body
         if item.imgSrc
           .chat-message-uploaded-img

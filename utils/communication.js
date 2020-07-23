@@ -1,6 +1,6 @@
 const config = require('../config/config');
 const socketEvents = require('../config/socketEvents.json');
-const formatMessage = require('./messages');
+const formatAdminMessage = require('./messages');
 
 class ServerCommunication {
   constructor(app, io) {
@@ -55,7 +55,7 @@ class ServerCommunication {
   }
 
   sendWelcomeMsg() {
-    const msg = formatMessage({text: 'Welcome to the Chat!'}).admin();
+    const msg = formatAdminMessage({text: 'Welcome to the Chat!'});
 
     this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
       this.toSender(socketEvents.renderAdminMessage, html);
@@ -69,7 +69,7 @@ class ServerCommunication {
   }
 
   informUserConnected() {
-    const msg = formatMessage({text: `${this.socket.handshake.user.username} has joined the chat`}).admin();
+    const msg = formatAdminMessage({text: `${this.socket.handshake.user.username} has joined the chat`});
 
     this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
       this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
@@ -77,7 +77,7 @@ class ServerCommunication {
   }
 
   informUserDisconnected() {
-    const msg = formatMessage({text: `${this.socket.handshake.user.username} has left the chat`}).admin();
+    const msg = formatAdminMessage({text: `${this.socket.handshake.user.username} has left the chat`});
 
     this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
       this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
