@@ -12,7 +12,7 @@ class Chat {
     };
   }
 
-  getRoomMessages = async (room, userId) => {
+  async getRoomMessages(room, userId) {
     const collection = client.db().collection(this.collectionName);
     const includeFields = {userId: 1, username: 1, text: 1, createTime: 1, updateTime: 1, imgSrc: 1};
     const addField = {role: {$cond: {if: {$eq: ['$userId', userId]}, then: 'owner', else: 'peer'}}};
@@ -28,9 +28,9 @@ class Chat {
       logger.warn(`Connected to DB. ${error.message}`);
       throw error;
     }
-  };
+  }
 
-  addMessage = async (data) => {
+  async addMessage(data) {
     const collection = await client.db().createCollection(this.collectionName, this.schemaValidator);
 
     try {
@@ -43,9 +43,9 @@ class Chat {
       logger.warn(`Cannot add message. ${error.message}`);
       throw error;
     }
-  };
+  }
 
-  editMessage = async (messageId, message) => {
+  async editMessage(messageId, message) {
     const collection = await client.db().collection(this.collectionName);
 
     try {
@@ -66,9 +66,9 @@ class Chat {
       logger.warn(`Cannot update message. ${error.message}`);
       throw error;
     }
-  };
+  }
 
-  deleteMessage = async (messageId) => {
+  async deleteMessage(messageId) {
     const collection = await client.db().collection(this.collectionName);
 
     try {
@@ -85,11 +85,11 @@ class Chat {
       logger.warn(`Cannot remove message from db. ${error.message}`);
       throw error;
     }
-  };
+  }
 
-  clearCollection = async () => {
+  async clearCollection() {
     await client.db().dropDatabase();
-  };
+  }
 }
 
 module.exports = Chat;

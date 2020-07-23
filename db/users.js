@@ -12,7 +12,7 @@ class Users {
     };
   }
 
-  addUser = async (user) => {
+  async addUser(user) {
     const collection = await client.db().createCollection(this.collectionName, this.schemaValidator);
 
     try {
@@ -23,9 +23,9 @@ class Users {
       logger.warn(`Cannot add user. ${error.message}`);
       throw new ServerError(error, 'Cannot add user');
     }
-  };
+  }
 
-  findUser = async (username) => {
+  async findUser(username) {
     const collection = client.db().collection(this.collectionName);
 
     try {
@@ -43,9 +43,9 @@ class Users {
       logger.warn(`Cannot find user. ${error.message}`);
       throw new ServerError(error, 'Cannot find user');
     }
-  };
+  }
 
-  addRoomToUser = async (user, room) => {
+  async addRoomToUser(user, room) {
     const collection = client.db().collection(this.collectionName);
 
     try {
@@ -56,9 +56,9 @@ class Users {
       logger.warn(`Cannot add room to the user. ${error.message}`);
       throw new ServerError(new ServerError(error, 'Cannot add room to the user'));
     }
-  };
+  }
 
-  removeUser = async (userId) => {
+  async removeUser(userId) {
     const collection = client.db().collection(this.collectionName);
 
     try {
@@ -73,11 +73,11 @@ class Users {
       logger.warn(`Cannot remove user. ${error.message}`);
       throw new ServerError(error, 'Cannot remove user');
     }
-  };
+  }
 
-  clearCollection = async () => {
+  async clearCollection() {
     client.db().dropDatabase();
-  };
+  }
 }
 
 module.exports = Users;
