@@ -14,16 +14,27 @@ class Chat {
 
   async getRoomMessages(room, userId) {
     const collection = client.db().collection(this.collectionName);
-    const includeFields = {userId: 1, username: 1, text: 1, updateTime: 1, imgSrc: 1};
 
     try {
       const results = await collection.aggregate([
         {$match: {room}},
-        {$project: {
-          ...includeFields,
-          role: {$cond: {if: {$eq: ['$userId', userId]}, then: 'owner', else: 'peer'}},
+        {$group: {
+          _id: {day: {$dayOfYear: '$_id'}},
+          data: {$push: {
+            $mergeObjects: [
+              '$$ROOT',
+              {createTime: {$toDate: '$_id'}},
+              {role: {$cond: {if: {$eq: ['$userId', userId]}, then: 'owner', else: 'peer'}}}
+            ],
+          }},
         }},
-        {$addFields: {createTime: {$toDate: '$_id'}}}
+        {$project: {
+          _id: 0,
+          day: '$_id.day',
+          date: {$dateToString: {date: {$arrayElemAt: ['$data.createTime', 0]}, format: '%Y-%m-%d'}},
+          data: '$data',
+        }},
+        {$sort: {day: 1}}
       ]).toArray();
 
       return results;
