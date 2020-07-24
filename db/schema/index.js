@@ -18,7 +18,7 @@ const userSchema = {
 
 const messageSchema = {
   bsonType: 'object',
-  required: ['userId', 'username'],
+  required: ['userId', 'username', 'room'],
   properties: {
     userId: {
       bsonType: 'string',
@@ -27,6 +27,22 @@ const messageSchema = {
     username: {
       bsonType: 'string',
       description: 'username is required',
+    },
+    role: {
+      bsonType: ['string', 'null'],
+      description: 'username is required',
+    },
+    room: {
+      bsonType: 'string',
+      description: 'user room is required',
+    },
+    text: {
+      bsonType: ['string', 'null'],
+      description: 'user text input',
+    },
+    imgSrc: {
+      bsonType: ['string', 'null'],
+      description: 'user image upload',
     },
   },
 };
