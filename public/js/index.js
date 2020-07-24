@@ -69,7 +69,12 @@ socket
     renderHTML(html);
     chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
   })
-  .on(socketEvents.renderMessageHistory, (html) => { document.getElementById('history-message-block').innerHTML = html; })
+  .on(socketEvents.renderMessageHistory, (html) => {
+    const block = document.createElement('div');
+
+    block.innerHTML = html;
+    document.getElementById('history-message-block').appendChild(block);
+  })
   .on(socketEvents.deleteMessageSuccess, (messageId) => {
     const element = document.getElementById(messageId);
 
