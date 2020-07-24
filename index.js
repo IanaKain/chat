@@ -39,7 +39,7 @@ const sessionStore = new MongoStore({url: config.db.connectionStr});
 const communicator = require('./utils/communication').createCommunication(app, chat);
 
 const communicate = communicator();
-const formatUserMessage = require('./utils/messages');
+const format = require('./utils/messages');
 const sendInvite = require('./utils/mail');
 
 app.set('views', path.join(__dirname, 'views'));
@@ -148,7 +148,7 @@ chat.on(socketEvents.connection, async (socket) => {
     socket.on(socketEvents.typeEnd, () => { communicate.toggleUserIsTyping(false, socket); });
 
     socket.on(socketEvents.sendMessage, (msg) => {
-      db.chat.addMessage(formatUserMessage({text: msg}, user))
+      db.chat.addMessage(format.formatUserMessage({text: msg}, user))
         .then((message) => communicate.sendMessage(message, socket, {add: true}))
         .catch((error) => console.warn(error.message));
     });
@@ -164,7 +164,7 @@ chat.on(socketEvents.connection, async (socket) => {
         const arrPath = filePath.split('/');
         const fileName = arrPath[arrPath.length - 1];
 
-        db.chat.addMessage(formatUserMessage({imgSrc: `../upload/${fileName}`}, user))
+        db.chat.addMessage(format.formatUserMessage({imgSrc: `../upload/${fileName}`}, user))
           .then((message) => communicate.sendMessage(message, socket, {add: true}))
           .catch((error) => console.warn(error.message));
       });

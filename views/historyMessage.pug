@@ -1,3 +1,5 @@
+if date
+  .divider= date
 for item in messages || []
   div(id=item._id class=`chat-message-wrapper chat-message-wrapper_${item.role}`)
     .chat-message

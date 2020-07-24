@@ -18,12 +18,8 @@ const userSchema = {
 
 const messageSchema = {
   bsonType: 'object',
-  required: ['role', 'userId', 'username', 'text'],
+  required: ['userId', 'username'],
   properties: {
-    role: {
-      bsonType: 'string',
-      description: 'role is required',
-    },
     userId: {
       bsonType: 'string',
       description: 'userId is required',

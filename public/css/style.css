@@ -444,6 +444,7 @@ select {
   animation: ellipsis steps(4, end) 2.5s infinite;
 }
 .divider {
+  margin: 10px 0;
   font-size: 16px;
   font-style: italic;
   text-align: center;
