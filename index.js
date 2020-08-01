@@ -1,6 +1,5 @@
 const cookie = require('cookie');
 const express = require('express');
-const base64Img = require('base64-img');
 const errorhandler = require('errorhandler');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -147,8 +146,11 @@ chat.on(socketEvents.connection, async (socket) => {
     socket.on(socketEvents.typeStart, () => { communicate.toggleUserIsTyping(true, socket); });
     socket.on(socketEvents.typeEnd, () => { communicate.toggleUserIsTyping(false, socket); });
 
-    socket.on(socketEvents.sendMessage, (msg) => {
-      db.chat.addMessage(format.formatUserMessage({text: msg}, user))
+    socket.on(socketEvents.sendMessage, ({message: msg, files}) => {
+      db.chat.addMessage({
+        ...format.formatUserMessage({text: msg}, user),
+        files: format.saveFilesReturnPath(files),
+      })
         .then((message) => communicate.sendMessage(message, socket, {add: true}))
         .catch((error) => console.warn(error.message));
     });
@@ -159,19 +161,8 @@ chat.on(socketEvents.connection, async (socket) => {
         .catch((error) => communicate.toSender(socketEvents.sendInviteResult, error.message));
     });
 
-    socket.on(socketEvents.uploadFile, async (file) => {
-      base64Img.img(file, './public/upload', Date.now(), (err, filePath) => {
-        const arrPath = filePath.split('/');
-        const fileName = arrPath[arrPath.length - 1];
-
-        db.chat.addMessage(format.formatUserMessage({imgSrc: `../upload/${fileName}`}, user))
-          .then((message) => communicate.sendMessage(message, socket, {add: true}))
-          .catch((error) => console.warn(error.message));
-      });
-    });
-
-    socket.on(socketEvents.editMessage, async (messageId, message) => {
-      db.chat.editMessage(messageId, message)
+    socket.on(socketEvents.editMessage, async (messageId, data) => {
+      db.chat.editMessage(messageId, data)
         .then((newMessage) => { communicate.sendMessage(newMessage, socket, {update: true}); })
         .catch((error) => console.warn(error.message));
     });

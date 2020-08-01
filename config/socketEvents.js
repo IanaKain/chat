@@ -17,6 +17,4 @@ const socketEvents = {
   renderAdminMessage: 'html:message:admin',
   renderMessage: 'html:message:add',
   renderPrivateMessage: 'html:message:private',
-  uploadFile: 'file:upload',
-  uploadFileResult: 'file:upload:result',
 };

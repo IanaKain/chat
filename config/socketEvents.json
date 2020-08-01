@@ -15,7 +15,5 @@
   "renderMessageHistory": "html:message",
   "renderMessage": "html:message:add",
   "renderAdminMessage": "html:message:admin",
-  "renderPrivateMessage": "html:message:private",
-  "uploadFile": "file:upload",
-  "uploadFileResult": "file:upload:result"
+  "renderPrivateMessage": "html:message:private"
 }

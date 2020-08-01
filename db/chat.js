@@ -59,13 +59,13 @@ class Chat {
     }
   }
 
-  async editMessage(messageId, message) {
+  async editMessage(messageId, {message}) {
     const collection = await client.db().collection(this.collectionName);
 
     try {
       const result = await collection.findOneAndUpdate(
         {_id: ObjectID(messageId)},
-        {$set: {text: message, updateTime: moment().calendar(Date.now())}},
+        {$set: {text: message, updateTime: moment().toISOString()}},
         {returnOriginal: false}
       );
 
