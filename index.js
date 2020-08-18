@@ -149,9 +149,43 @@ chat.on(socketEvents.connection, async (socket) => {
     socket.on(socketEvents.sendMessage, ({message: msg, files}) => {
       db.chat.addMessage({
         ...format.formatUserMessage({text: msg}, user),
-        files: format.saveFilesReturnPath(files),
+        files: format.saveFilesReturnPathSync(files),
       })
         .then((message) => communicate.sendMessage(message, socket, {add: true}))
+        .catch((error) => console.warn(error.message));
+    });
+
+    socket.on(socketEvents.editMessage, async (messageId, {message, files, emoji}) => {
+      const prevMessage = await db.chat.getMessage(messageId);
+
+      db.chat.editMessage(messageId, {
+        text: message,
+        files: files && format.saveFilesReturnPathSync(files),
+        emoji: [...(prevMessage.emoji || []), emoji],
+      })
+        .then((newMessage) => {
+          if (files && files.length) {
+            format.removeFileSync(prevMessage.files);
+          }
+
+          return newMessage;
+        })
+        .then((newMessage) => {
+          communicate.sendMessage(newMessage, socket, {update: true});
+        })
+        .catch((error) => console.warn(error.message));
+    });
+
+    socket.on(socketEvents.deleteMessage, async (messageId) => {
+      const prevMessage = await db.chat.getMessage(messageId);
+
+      db.chat.deleteMessage(messageId)
+        .then(() => {
+          if (prevMessage) {
+            format.removeFileSync(prevMessage.files);
+          }
+        })
+        .then(() => communicate.sendMessage(messageId, socket, {remove: true}))
         .catch((error) => console.warn(error.message));
     });
 
@@ -159,18 +193,6 @@ chat.on(socketEvents.connection, async (socket) => {
       sendInvite({from: user.username, to: receivers, link: socket.handshake.headers.origin})
         .then(cb)
         .catch((error) => communicate.toSender(socketEvents.sendInviteResult, error.message));
-    });
-
-    socket.on(socketEvents.editMessage, async (messageId, data) => {
-      db.chat.editMessage(messageId, data)
-        .then((newMessage) => { communicate.sendMessage(newMessage, socket, {update: true}); })
-        .catch((error) => console.warn(error.message));
-    });
-
-    socket.on(socketEvents.deleteMessage, async (messageId) => {
-      db.chat.deleteMessage(messageId)
-        .then(() => communicate.sendMessage(messageId, socket, {remove: true}))
-        .catch((error) => console.warn(error.message));
     });
 
     socket.on(socketEvents.disconnect, async (data) => {
