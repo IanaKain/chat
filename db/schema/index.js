@@ -18,7 +18,7 @@ const userSchema = {
 
 const messageSchema = {
   bsonType: 'object',
-  required: ['userId', 'username', 'room'],
+  required: ['userId', 'username', 'room', 'files'],
   properties: {
     userId: {
       bsonType: 'string',
@@ -43,6 +43,13 @@ const messageSchema = {
     imgSrc: {
       bsonType: ['string', 'null'],
       description: 'user image upload',
+    },
+    files: {
+      bsonType: ['array'],
+      description: 'files is required',
+    },
+    emoji: {
+      bsonType: ['array'],
     },
   },
 };

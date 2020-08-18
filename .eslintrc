@@ -8,7 +8,22 @@
   "globals": {
     "socketEvents": "readonly",
     "io": "readonly",
-    "EmojiButton": "readonly"
+    "EmojiButton": "readonly",
+    "processedFiles": "writeable",
+    "currentFileCount": "writeable",
+    "maxFileCount": "readonly",
+    "renderFilePreview": "readonly",
+    "getFileTemplate": "readonly",
+    "fileToBase64": "readonly",
+    "processFile": "readonly",
+    "clearPreviewPanel": "readonly",
+    "refreshPreviewPanel": "readonly",
+    "deleteFileAtIndex": "readonly",
+    "addFiles": "readonly",
+    "editMessage": "readonly",
+    "messageIdInEditMode": "writeable",
+    "renderHTML": "readonly",
+    "autoGrow": "readonly"
   },
   "extends": [
     "eslint:recommended",
@@ -70,7 +85,8 @@
     "no-unused-vars": [2, {
       "vars": "all",
       "args": "none",
-      "varsIgnorePattern": "[iI]gnored"
+      "varsIgnorePattern": "^_",
+      "argsIgnorePattern": "^_"
     }],
     "no-confusing-arrow": 0,
     "eol-last": 0,

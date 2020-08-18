@@ -1,6 +1,5 @@
 let typing = false;
 let timeout;
-let messageIdInEditMode = null;
 
 const socket = io('/chat', {
   transports: ['websocket'],
@@ -25,28 +24,8 @@ picker.on('emoji', (emoji) => {
   document.querySelector('textarea').value += emoji;
 });
 
-const renderHTML = (html) => {
-  if (html) {
-    const messageBlock = document.getElementById('chat-message-block');
-
-    messageBlock.innerHTML += html;
-  } else {
-    console.log('There is a problem:', html);
-  }
-};
-
 const deleteMessage = (messageId) => {
   socket.emit(socketEvents.deleteMessage, messageId);
-};
-
-const editMessage = (messageId) => {
-  messageIdInEditMode = messageId;
-  const message = document.getElementById(messageId);
-  const messageContent = message.querySelector('.message__user-content').textContent;
-  const textInput = document.getElementById('message');
-
-  textInput.value = messageContent;
-  textInput.focus();
 };
 /* eslint-enable no-unused-vars */
 
@@ -55,14 +34,6 @@ socket
   .on(socketEvents.typeStart, (html) => { document.getElementById('chat-message-isTyping').innerHTML = html; })
   .on(socketEvents.typeEnd, () => { document.getElementById('chat-message-isTyping').innerHTML = null; })
   .on(socketEvents.renderUsers, (html) => { document.querySelector('.chat-sidebar__room-users-data').innerHTML = html; })
-  .on(socketEvents.uploadFileResult, (path) => {
-    const demoImage = document.createElement('img');
-
-    demoImage.src = path;
-    document
-      .getElementById('chat-message-block')
-      .appendChild(demoImage);
-  })
   .on(socketEvents.renderMessage, (html) => {
     const chatMsgBlock = document.querySelector('.chat-messages');
 
@@ -95,27 +66,26 @@ function toggleEmojiPicker() {
   picker.pickerVisible ? picker.hidePicker() : picker.showPicker();
 }
 
-function autoGrow({target}) {
+function postMessage(message, target) {
   const element = target;
+  const files = processedFiles.length ? processedFiles.map((file) => file.base64) : [];
 
-  element.style.height = `${element.scrollHeight}px`;
+  messageIdInEditMode
+    ? socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files})
+    : socket.emit(socketEvents.sendMessage, {message, files});
+
+  element.value = '';
+  element.style.height = '34px';
+  clearPreviewPanel();
+  element.focus();
 }
 
 function onKeyDownNotEnter(event) {
-  const element = event.target;
-  const value = element.value.trim();
+  const value = event.target.value.trim();
 
   if (event.key === 'Enter' && !event.shiftKey && value) {
     event.preventDefault();
-
-    if (messageIdInEditMode) {
-      socket.emit(socketEvents.editMessage, messageIdInEditMode, value);
-    } else {
-      socket.emit(socketEvents.sendMessage, value);
-      element.value = '';
-      element.style.height = '34px';
-      element.focus();
-    }
+    postMessage(value, event.target);
   } else {
     const timeoutFunction = () => {
       typing = false;
@@ -137,32 +107,44 @@ window.onload = function () {
   const chatForm = document.getElementById('chat-form');
   const textInput = document.getElementById('message');
   const inviteForm = document.getElementById('chat-invite-form');
-  const inputUpload = document.getElementById('file');
+  const uploadFileContainer = document.getElementById('upload-file-container');
+  const inputFile = uploadFileContainer.querySelector('input[type="file"]');
+  const imagePreview = document.getElementById('images-list');
   const emojiPicker = document.getElementById('emoji-picker');
 
   emojiPicker.addEventListener('click', toggleEmojiPicker);
 
-  inputUpload.addEventListener('change', ({target}) => {
-    const reader = new FileReader();
+  inputFile.addEventListener('change', ({target}) => {
+    addFiles(target.files);
+  }, true);
 
-    reader.onload = (event) => { socket.emit(socketEvents.uploadFile, event.target.result); };
-    reader.readAsDataURL(target.files[0]);
+  imagePreview.addEventListener('click', ({target}) => {
+    // Listen for a click to the specific clear button
+    if (target.matches('.image-clear-icon')) {
+      const fileToken = target.getAttribute('data-upload-token');
+      const selectedFileIndex = processedFiles
+        .findIndex(({file}) => file && file.token === fileToken);
+
+      deleteFileAtIndex(selectedFileIndex);
+    }
   });
+
+  // inputUpload.addEventListener('change', ({target}) => {
+  //   inputUploadLabel.classList.add('active');
+  //   inputUpload.setAttribute('disabled', 'true');
+  // });
+
+  // inputUploadLabel.addEventListener('click', () => {
+  //   inputUploadLabel.classList.remove('active');
+  //   inputUpload.removeAttribute('disabled');
+  // });
 
   textInput.addEventListener('keydown', onKeyDownNotEnter);
   textInput.addEventListener('keyup', autoGrow);
 
   chatForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    const {message} = event.target.elements;
-
-    if (messageIdInEditMode) {
-      socket.emit(socketEvents.editMessage, messageIdInEditMode, message.value);
-    } else {
-      socket.emit(socketEvents.sendMessage, message.value);
-      message.value = '';
-      message.focus();
-    }
+    postMessage(event.target.elements.message.value, event.target);
   });
 
   inviteForm.addEventListener('submit', (event) => {

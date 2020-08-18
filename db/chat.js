@@ -44,6 +44,19 @@ class Chat {
     }
   }
 
+  async getMessage(messageId) {
+    const collection = await client.db().collection(this.collectionName);
+
+    try {
+      const message = await collection.findOne({_id: ObjectID(messageId)});
+
+      return message;
+    } catch (error) {
+      logger.warn(`Cannot find message. ${error.message}`);
+      throw error;
+    }
+  }
+
   async addMessage(data) {
     const collection = await client.db().createCollection(this.collectionName, this.schemaValidator);
 
@@ -59,13 +72,30 @@ class Chat {
     }
   }
 
-  async editMessage(messageId, message) {
+  async editMessage(messageId, data) {
     const collection = await client.db().collection(this.collectionName);
+    const updateProps = Object
+      .keys(data)
+      .reduce(
+        (acc, key) => {
+          if (data[key]) {
+            if (Array.isArray(data[key])) {
+              return data[key].length
+                ? {...acc, [key]: data[key]}
+                : acc;
+            }
+
+            return {...acc, [key]: data[key]};
+          }
+
+          return acc;
+        }, {}
+      );
 
     try {
       const result = await collection.findOneAndUpdate(
         {_id: ObjectID(messageId)},
-        {$set: {text: message, updateTime: moment().calendar(Date.now())}},
+        {$set: {...updateProps, updateTime: moment().toISOString()}},
         {returnOriginal: false}
       );
 

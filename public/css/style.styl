@@ -1,4 +1,5 @@
 color-dark-base = #32465a;
+color-dark-base-tr = rgba(50,70,90,0.9);
 color-dark-content = #435f7a;
 color-light-messages = aliceblue;
 color-normal-base = #48829a;
@@ -22,6 +23,9 @@ h1
   font-family: sans-serif;
   font-weight: 400;
   font-size: 26px;
+
+p
+  margin: 0;
 
 .emoji-picker
   position: absolute;
@@ -57,7 +61,7 @@ h1
 .header-block
   display: flex;
   justify-content: space-between;
-  width: 80%;
+  max-width: 80%;
   margin: 0 auto;
 
   .link
@@ -238,11 +242,30 @@ select
     padding-left: 8px;
 
 .chat-content
+  position: relative;
   flex-grow: 1;
   overflow: auto;
   font-size: 18px
   color: color-light-base;
   background: color-dark-content;
+
+#images-list
+  width: 12%;
+  max-height: 80%;
+  position: absolute;
+  right: 0;
+  bottom: 46px;
+  overflow: auto;
+  background-color: color-dark-base-tr;
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
+
+  .image-list_preview
+    height: 80px;
+    margin: 16px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 
 .chat-footer
   flex-shrink: 0;
@@ -457,7 +480,9 @@ select
   animation: ellipsis steps(4, end) 2.5s infinite;
 
 .divider
-  margin: 10px 0;
+  position: sticky;
+  top: 10px;
+  margin: 20px 0 10px;
   font-size: 16px;
   font-style: italic;
   text-align: center;
@@ -473,6 +498,8 @@ select
   align-items: center;
   background: #fff;
 
+
+
   .form-item
     margin: 0;
     padding: 0;
@@ -482,6 +509,11 @@ select
     justify-content: flex-start;
     align-items: flex-end;
     background: color-dark-base;
+
+    #image-clear
+      position: absolute;
+      right: 133px;
+      bottom: 10px;
 
     #message
       width: 100%
@@ -499,6 +531,9 @@ select
       //overflow:hidden;
       display: block;
       resize: none;
+      background-size: 32px 32px;
+      background-repeat: no-repeat;
+      background-position: bottom 0 right 122px;
 
       &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
         color: color-dark-base;
@@ -549,6 +584,7 @@ select
     font-size: 22px;
 
   .attach-file
+    position: relative;
     height: 100%;
     margin: 0;
     display: flex;
@@ -556,6 +592,20 @@ select
     flex-direction: column;
     align-items: center;
     cursor: pointer;
+
+  .attach-file.active::after
+    position: absolute;
+    top: -3px;
+    right: -8px;
+    content: '+';
+    display: block;
+    width: 16px;
+    height: 15px;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    background: #228b22;
+    border-radius: 50%;
 
   #file
     display: none;
@@ -637,16 +687,28 @@ select
 
 .chat-message:hover
   .chat-message-actions
-    visibility visible
+    visibility: visible
+
+  .edit-message-btn[disabled]
+    cursor: not-allowed;
+
+  .emoji-picker-btn
+    .fa.fa-smile-o
+      font-size: 16px;
 
 .chat-message-user-info
   font-weight bold
-  margin: 0 10px 0 16px
+  margin: 0 10px 0 12px
 
 .chat-message-body
-  min-width: 130px;
+  min-width: 60px;
   padding: 12px 16px;
   border-radius: 16px;
+
+.chat-message-emoji
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
 
 .chat-message-uploaded-img
   img
@@ -659,10 +721,10 @@ select
   align-items: center;
 
 .chat-message-actions
-  visibility hidden
+  visibility: hidden
 
 .chat-message-date
-  font-size: 14px;
+  font-size: 12px;
   font-style: italic;
   color: rgba(0,0,0,.7)
 
@@ -704,3 +766,127 @@ select
     box-shadow: 0 0 2px 0 color-dark-content;
     border-bottom-right-radius: 0;
 
+
+
+grey = #EDEDE8;
+font-color = #333;
+border-color = darken(grey, 20%);
+
+#upload-file-container {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+
+  &__custom-file {
+    box-sizing: border-box;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: calc(2.25rem + 2px);
+    margin-bottom: 0;
+    margin-top: 5px;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    &__custom-file-input {
+      box-sizing: border-box;
+      min-width: 14rem;
+      max-width: 100%;
+      height: calc(2.25rem + 2px);
+      margin: 0;
+      opacity: 0;
+
+      // on input focus, applies focus style to the styled input span
+      &:focus ~ span {
+        outline: 1px dotted #212121;
+        outline: 5px auto -webkit-focus-ring-color;
+      }
+    }
+
+    &__custom-file-control {
+      box-sizing: border-box;
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      z-index: 5;
+      height: calc(2.25rem + 2px);
+      padding: .5rem .75rem;
+      overflow: hidden;
+      line-height: 1.5;
+      color: font-color;
+      user-select: none;
+      background-color: white;
+      background-clip: padding-box;
+      border: 1px solid border-color;
+      border-radius: .25rem;
+
+      &__button {
+        box-sizing: border-box;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 6;
+        display: block;
+        height: calc(2.25rem + 2px);
+        padding: .5rem .75rem;
+        line-height: 1.25;
+        color: font-color;
+        background-color: grey;
+        border-left: 1px solid border-color;
+        box-sizing: border-box;
+      }
+    }
+  }
+
+  &__image-multi-preview {
+    position: relative;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    float: left;
+    margin: 1.858736059%;
+    width: 29.615861214%;
+    height: 90px;
+    box-shadow: 0 4px 10px 0 rgba(black, 0.25);
+  }
+}
+
+.image-clear-wrapper {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  right: 14px;
+  margin-top: -6px;
+  text-align: center;
+  background: color-light-base;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px 0 rgba(black, 0.25);
+
+  &:hover {
+    background: darken(color-light-base, 20%);
+    cursor: pointer;
+  }
+
+  .image-clear-icon {
+    display: block;
+    margin-top: -3px;
+    font-weight: bold;
+    color: darken(color-light-base, 55%);
+  }
+}
+
+#edit-mode-flag {
+  .fa.fa-pencil {
+    padding: 0 10px;
+    cursor: pointer;
+  }
+}
+
+.chat-message-emoji
+  padding-top: 4px;
