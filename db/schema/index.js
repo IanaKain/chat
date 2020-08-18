@@ -48,6 +48,9 @@ const messageSchema = {
       bsonType: ['array'],
       description: 'files is required',
     },
+    emoji: {
+      bsonType: ['array'],
+    },
   },
 };
 
