@@ -7,9 +7,9 @@ function renderFilePreview(file) {
   const imagePreview = document.getElementById('images-list');
 
   imagePreview.innerHTML += `
-        <div class="image-list_preview" data-upload-token="${file.token}" style="background-image: url('${file.preview}');">
+        <div class="image-list_preview" data-upload-token="${file.file.token}" style="background-image: url('${file.preview}');">
           <span class="image-clear-wrapper">
-            <span class="image-clear-icon" data-upload-token="${file.token}">
+            <span class="image-clear-icon" data-upload-token="${file.file.token}">
               &times;
             </span>
           </span>
@@ -54,8 +54,10 @@ function fileToBase64(data) {
 // Append a file object to the image preview container
 function processFile(file) {
   file.base64
-    ? renderFilePreview(file.file)
-    : fileToBase64(file).then((processedFile) => { renderFilePreview(processedFile); });
+    ? renderFilePreview(file)
+    : fileToBase64(file).then((processedFile) => {
+      renderFilePreview(processedFile);
+    });
 }
 
 function clearPreviewPanel() {
@@ -99,9 +101,11 @@ function addFiles(files) {
   for (let i = 0; i < currentFileCount; i++) {
     const file = files[i];
 
-    // give each file a unique token
-    file.token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    imagePreview.classList.add('active');
-    processFile(file);
+    if (file) {
+      // give each file a unique token
+      file.token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      imagePreview.classList.add('active');
+      processFile(file);
+    }
   }
 }

@@ -18,7 +18,7 @@ class ServerCommunication {
   }
 
   isOwner(socket) {
-    return socket.handshake.user.userId === this.socket.handshake.user.userId
+    return socket.handshake.user.userId === this.socket.handshake.user.userId;
   }
 
   get toAll() {
@@ -107,7 +107,7 @@ class ServerCommunication {
   }
 
   sendMessage(msg, socket, {add, update, remove}) {
-    const isOwner = this.isOwner(socket);
+    const isOwner = this.isOwner(socket) && msg.username === socket.handshake.user.username;
     const event = (add && socketEvents.renderMessage)
       || (update && socketEvents.editMessageSuccess);
 
