@@ -51,7 +51,6 @@ block content
             form#chat-form
               .form-item
                 textarea#message(
-                  required
                   type='text'
                   name='message'
                   placeholder='Enter message...'
@@ -66,7 +65,7 @@ block content
                           type='file'
                           id='file'
                           name='file'
-                          accept='*'
+                          accept='image/*'
                           multiple
                           class='custom-file-container__custom-file__custom-file-input'
                         )
