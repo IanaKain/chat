@@ -10,13 +10,15 @@ for item in messages || []
         .chat-message-date(title=updated ? updated : created)= updated ? `Edited ${updated}` : created
       .chat-message-body
         if (item.files && item.files.length)
-          for file in item.files
+          for fileAddr in item.files
             .chat-message-uploaded-img
-              img(src=`${file}`)
+              img(src=`/${fileAddr}`)
         if (item.files && item.files.length && item.text)
           br
         if item.text
           .chat-message-text= item.text
+        if (item.emoji && item.emoji.length)
+          .chat-message-emoji= item.emoji.join('')
       .chat-message-footer
         if item.role === 'owner'
           .chat-message-actions
@@ -24,3 +26,7 @@ for item in messages || []
               i.fa.fa-pencil-square-o
             button.icon-btn.delete-message-btn(type='button', onclick="deleteMessage('" + item._id + "')")
               i.fa.fa-trash-o
+        if item.role !== 'owner'
+          .chat-message-actions
+            button.icon-btn.emoji-picker-btn(type='button', onclick="toggleEmojiPicker('" + item._id + "')")
+              i.fa.fa-smile-o
