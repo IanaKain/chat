@@ -15,6 +15,10 @@ const disconnect = () => {
   window.location.href = '/logout';
 };
 
+const deleteMessage = (messageId) => {
+  socket.emit(socketEvents.deleteMessage, messageId);
+};
+
 const picker = new EmojiButton();
 
 picker.on('emoji', (emoji) => {
@@ -24,51 +28,7 @@ picker.on('emoji', (emoji) => {
     document.querySelector('textarea').value += emoji;
   }
 });
-
-const deleteMessage = (messageId) => {
-  socket.emit(socketEvents.deleteMessage, messageId);
-};
 /* eslint-enable no-unused-vars */
-
-socket
-  .on(socketEvents.disconnect, () => { window.location.href = '/logout'; })
-  .on(socketEvents.typeStart, (html) => { document.getElementById('chat-message-isTyping').innerHTML = html; })
-  .on(socketEvents.typeEnd, () => { document.getElementById('chat-message-isTyping').innerHTML = null; })
-  .on(socketEvents.renderUsers, (html) => { document.querySelector('.chat-sidebar__room-users-data').innerHTML = html; })
-  .on(socketEvents.renderMessage, (html) => {
-    const chatMsgBlock = document.querySelector('.chat-messages');
-
-    renderHTML(html);
-    chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
-  })
-  .on(socketEvents.renderMessageHistory, (html) => {
-    const block = document.createElement('div');
-
-    block.innerHTML = html;
-    document.getElementById('history-message-block').appendChild(block);
-  })
-  .on(socketEvents.deleteMessageSuccess, (messageId) => {
-    const element = document.getElementById(messageId);
-
-    element.remove();
-  })
-  .on(socketEvents.editMessageSuccess, (html) => {
-    const [editModeFlag, messageToEdit, textInput, editBtn] =
-      getElementsBySelectors('#edit-mode-flag', `#${messageIdInEditMode}`, '#message', '.edit-message-btn');
-
-    if (editModeFlag) {
-      editModeFlag.remove();
-    }
-
-    messageToEdit.outerHTML = html;
-    textInput.value = '';
-    textInput.focus();
-    messageIdInEditMode = null;
-
-    if (editBtn) {
-      editBtn.disabled = false;
-    }
-  });
 
 function getElementsBySelectors(...selectors) {
   return selectors.map((s) => document.querySelector(s));
@@ -168,6 +128,47 @@ function sendInvite(event) {
   });
   setTimeout(() => { email.value = ''; }, 1000);
 }
+
+socket
+  .on(socketEvents.disconnect, () => { window.location.href = '/logout'; })
+  .on(socketEvents.typeStart, (html) => { document.getElementById('chat-message-isTyping').innerHTML = html; })
+  .on(socketEvents.typeEnd, () => { document.getElementById('chat-message-isTyping').innerHTML = null; })
+  .on(socketEvents.renderUsers, (html) => { document.querySelector('.chat-sidebar__room-users-data').innerHTML = html; })
+  .on(socketEvents.renderMessage, (html) => {
+    const chatMsgBlock = document.querySelector('.chat-messages');
+
+    renderHTML(html);
+    chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
+  })
+  .on(socketEvents.renderMessageHistory, (html) => {
+    const block = document.createElement('div');
+
+    block.innerHTML = html;
+    document.getElementById('history-message-block').appendChild(block);
+  })
+  .on(socketEvents.deleteMessageSuccess, (messageId) => {
+    const element = document.getElementById(messageId);
+
+    element.remove();
+  })
+  .on(socketEvents.editMessageSuccess, (html) => {
+    const messageToEdit = document.getElementById(messageIdInEditMode);
+    const [editModeFlag, textInput, editBtn] =
+      getElementsBySelectors('#edit-mode-flag', '#message', '.edit-message-btn');
+
+    if (editModeFlag) {
+      editModeFlag.remove();
+    }
+
+    messageToEdit.outerHTML = html;
+    textInput.value = '';
+    textInput.focus();
+    messageIdInEditMode = null;
+
+    if (editBtn) {
+      editBtn.disabled = false;
+    }
+  });
 
 window.onload = function () {
   const [chatForm, textInput, inviteForm, uploadFileContainer, imagePreview, emojiPicker] = getElementsBySelectors(
