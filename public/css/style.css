@@ -300,6 +300,7 @@ select {
   padding-left: 8px;
   background: transparent;
   border-color: #f5f5f5;
+  color: #f5f5f5 !important;
 }
 .form-item.chat-invite-form #email::placeholder {
 /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -324,7 +325,7 @@ select {
   bottom: 66px;
   left: 52px;
   color: #f5f5f5;
-  font-size: 14px;
+  font-size: 15px;
   max-height: 30px;
   overflow: auto;
   max-width: 200px;
