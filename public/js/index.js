@@ -156,8 +156,8 @@ socket
 
     element.remove();
   })
-  .on(socketEvents.editMessageSuccess, (html) => {
-    const messageToEdit = document.getElementById(messageIdInEditMode);
+  .on(socketEvents.editMessageSuccess, (html, messageId) => {
+    const messageToEdit = document.getElementById(messageIdInEditMode || messageId);
     const [editModeFlag, textInput, editBtn] =
       getElementsBySelectors('#edit-mode-flag', '#message', '.edit-message-btn');
 

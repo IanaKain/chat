@@ -417,7 +417,6 @@ select
   box-shadow: 0 0 2px 0 color-dark-content;
 
 .chat-message-block__message.peer
-  margin: 10px auto 10px 8px;
   border-bottom-left-radius: 0;
   background: color-light-base;
   box-shadow: 0 0 2px 0 color-dark-base;
@@ -706,13 +705,15 @@ select
 
 .chat-message-body
   min-width: 60px;
-  padding: 12px 16px;
+  padding: 8px 12px;
   border-radius: 16px;
 
 .chat-message-emoji
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  padding-top: 4px;
+  line-height: 10px;
 
 .chat-message-uploaded-img
   img
@@ -750,7 +751,7 @@ select
 .chat-message-wrapper_peer
 
   .chat-message
-    margin: 10px auto 10px 8px;
+    margin: 10px auto 0 8px;
 
   .chat-message-body
     color: color-dark-base;
@@ -891,6 +892,3 @@ border-color = darken(grey, 20%);
     cursor: pointer;
   }
 }
-
-.chat-message-emoji
-  padding-top: 4px;
