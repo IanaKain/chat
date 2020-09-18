@@ -54,6 +54,5 @@ jspm_packages/
 
 .idea/
 .DS_Store
-.env
 
 public/upload
