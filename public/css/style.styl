@@ -5,6 +5,7 @@ color-light-messages = aliceblue;
 color-normal-base = #48829a;
 color-light-base = #f5f5f5;
 color-light-body = #E6EAEA;
+color-error = #e50000;
 
 html
   height: 100%
@@ -150,6 +151,7 @@ select
 
   .error-message
     margin: 0;
+    color: color-error;
 
 .container-page__chat
   min-height: 100%;
@@ -271,6 +273,7 @@ select
   flex-shrink: 0;
   background: color-dark-base;
   padding: 12px;
+  padding-left: 0;
 
 .chat-content-inner
   width: 80%;
@@ -333,10 +336,10 @@ select
 
   #invite-confirmation
     position: absolute;
-    top: -50px;
-    left: -158px;
+    bottom: 66px;
+    left: 52px;
     color: color-light-base;
-    font-size: 14px;
+    font-size: 15px;
     max-height: 30px;
     overflow: auto;
     max-width: 200px;

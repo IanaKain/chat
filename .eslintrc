@@ -22,7 +22,6 @@
     "addFiles": "readonly",
     "editMessage": "readonly",
     "messageIdInEditMode": "writeable",
-    "renderHTML": "readonly",
     "autoGrow": "readonly"
   },
   "extends": [

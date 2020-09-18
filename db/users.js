@@ -49,9 +49,7 @@ class Users {
     const collection = client.db().collection(this.collectionName);
 
     try {
-      const result = await collection.findOneAndUpdate({_id: ObjectID(user.userId)}, {$set: {room}});
-
-      return result;
+      return await collection.findOneAndUpdate({_id: ObjectID(user.userId)}, {$set: {room}});
     } catch (error) {
       logger.warn(`Cannot add room to the user. ${error.message}`);
       throw new ServerError(new ServerError(error, 'Cannot add room to the user'));
