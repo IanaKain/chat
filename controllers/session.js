@@ -1,13 +1,11 @@
 const bcrypt = require('bcrypt');
-const Base = require('./index');
 const db = require('../db/index').collections();
 const config = require('../config/config');
 const constants = require('../constants/index');
 const {ServerError} = require('../utils/error');
 
-class Sessions extends Base {
+class Sessions {
   constructor(methods = ['']) {
-    super(methods);
     methods.forEach((m) => { this[m] = this[m].bind(this); });
   }
   async findAndAuthorize(fromData) {

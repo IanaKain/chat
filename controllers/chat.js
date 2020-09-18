@@ -1,10 +1,8 @@
-const Base = require('./index');
 const config = require('../config/config');
 const {ServerError} = require('../utils/error');
 
-class Chat extends Base {
+class Chat {
   constructor(methods = ['']) {
-    super(methods);
     methods.forEach((m) => { this[m] = this[m].bind(this); });
   }
 

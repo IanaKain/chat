@@ -321,8 +321,8 @@ select {
 }
 .form-item.chat-invite-form #invite-confirmation {
   position: absolute;
-  top: -50px;
-  left: -158px;
+  bottom: 66px;
+  left: 52px;
   color: #f5f5f5;
   font-size: 14px;
   max-height: 30px;
