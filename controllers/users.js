@@ -30,9 +30,10 @@ class Users {
         });
       } else {
         const salt = await bcrypt.genSalt(10);
-        const securePassword = bcrypt.hash(req.body.password, salt);
+        const securePassword = await bcrypt.hash(req.body.password, salt);
 
         req.session.user = await db.users.addUser({...req.body, password: securePassword});
+        res.redirect(config.routes.chat);
       }
     } catch (error) {
       next(new ServerError(error));
