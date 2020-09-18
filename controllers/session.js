@@ -42,7 +42,7 @@ class Sessions {
     } catch (error) {
       const {wrongPassword, userNotFound} = constants.errors;
 
-      if (error.message === wrongPassword) { // err handler?
+      if (error.message === wrongPassword) { // TODO move to error handler?
         return res.render(config.templates.login, {...constants.formProps, user: null, error: wrongPassword});
       }
       if (error.message === userNotFound) { return res.redirect(config.routes.join); }

@@ -136,8 +136,9 @@ socket
   .on(socketEvents.renderUsers, (html) => { document.querySelector('.chat-sidebar__room-users-data').innerHTML = html; })
   .on(socketEvents.renderMessage, (html) => {
     const chatMsgBlock = document.querySelector('.chat-messages');
+    const messageBlock = document.getElementById('chat-message-block');
 
-    renderHTML(html);
+    messageBlock.innerHTML += html;
     chatMsgBlock.scrollTop = chatMsgBlock.scrollHeight;
   })
   .on(socketEvents.renderMessageHistory, (html) => {

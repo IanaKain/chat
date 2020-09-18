@@ -45,16 +45,6 @@ function editMessage(messageId) {
   textInput.focus();
 }
 
-function renderHTML(html, element) {
-  if (html) { // element
-    const messageBlock = document.getElementById('chat-message-block');
-
-    messageBlock.innerHTML += html;
-  } else {
-    console.log('There is a problem:', html);
-  }
-}
-
 function autoGrow(event) {
   const textAreaValue = document.getElementById('message').value;
   const element = event.target;
