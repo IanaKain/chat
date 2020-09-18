@@ -112,6 +112,8 @@ class ServerCommunication {
     if (remove) {
       this.toSender(socketEvents.deleteMessageSuccess, msg);
       this.toAllInRoomExceptSender(socketEvents.deleteMessageSuccess, msg);
+
+      return;
     }
 
     if (update) {
