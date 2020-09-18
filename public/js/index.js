@@ -114,6 +114,10 @@ function onKeyDown() {
   };
 }
 
+function onEnterPress(event) {
+  onKeyDown()(event);
+}
+
 function sendInvite(event) {
   event.preventDefault();
   const {email} = event.target.elements;
@@ -177,6 +181,7 @@ window.onload = function () {
   );
   const inputFile = uploadFileContainer.querySelector('input[type="file"]');
 
+  document.addEventListener('keydown', onEnterPress);
   emojiPicker.addEventListener('click', toggleEmojiPicker);
   inputFile.addEventListener('change', addFilesToPreviewList);
   imagePreview.addEventListener('click', removeFileFromPreviewList);
