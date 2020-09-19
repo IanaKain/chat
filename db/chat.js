@@ -2,6 +2,7 @@ const moment = require('moment');
 const {ObjectID} = require('mongodb');
 const {client} = require('./client');
 const {schema} = require('./schema/index');
+const format = require('../utils/messages');
 const logger = require('../utils/logger')(module);
 
 class Chat {
@@ -138,6 +139,7 @@ class Chat {
   }
 
   async deleteMessage(messageId) {
+    const prevMessage = await this.getMessage(messageId);
     const collection = await client.db().collection(this.collectionName);
 
     try {
@@ -147,6 +149,10 @@ class Chat {
         logger.info(`Message ${messageId} removed from db.`);
       } else {
         throw new Error(messageId);
+      }
+
+      if (prevMessage) {
+        format.removeFileSync(prevMessage.files);
       }
 
       return result;

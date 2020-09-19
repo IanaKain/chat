@@ -112,19 +112,17 @@ class ServerCommunication {
     }
   }
 
-  sendMessage(msg, socket, {add, update, remove, react}) {
-    if (remove) {
-      this.toAllInRoom(socketEvents.deleteMessageSuccess, msg);
+  removeMessage(messageId) {
+    this.toAllInRoom(socketEvents.deleteMessageSuccess, messageId);
+  }
 
-      return;
-    }
+  reactOnMessage(msg) {
+    this.server.render(config.templates.body, {item: msg}, (err, html) => {
+      this.toAllInRoom(socketEvents.reactOnMessageSuccess, html, msg._id);
+    });
+  }
 
-    if (react) {
-      this.server.render(config.templates.body, {item: msg}, (err, html) => {
-        this.toAllInRoom(socketEvents.reactOnMessageSuccess, html, msg._id);
-      });
-    }
-
+  sendMessage(msg, socket, {add, update}) {
     if (add) {
       this.server.render(config.templates.history, {messages: [{...msg, role: 'peer'}]}, (err, html) => {
         this.toAllInRoomExceptSender(socket)(socketEvents.renderMessage, html);
@@ -132,6 +130,8 @@ class ServerCommunication {
       this.server.render(config.templates.history, {messages: [{...msg, role: 'owner'}]}, (err, html) => {
         this.toSender(socket)(socketEvents.renderMessage, html);
       });
+
+      return;
     }
 
     if (update) {

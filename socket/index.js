@@ -87,20 +87,13 @@ module.exports = (app, sessionStore, io) => {
 
       socket.on(socketEvents.reactOnMessage, async (messageId, {emoji}) => {
         db.chat.addMessageReaction(messageId, emoji)
-          .then((newMessage) => { communicate.sendMessage(newMessage, socket, {react: true}); })
+          .then((newMessage) => { communicate.reactOnMessage(newMessage); })
           .catch((error) => console.warn(error.message));
       });
 
       socket.on(socketEvents.deleteMessage, async (messageId) => {
-        const prevMessage = await db.chat.getMessage(messageId);
-
         db.chat.deleteMessage(messageId)
-          .then(() => {
-            if (prevMessage) {
-              format.removeFileSync(prevMessage.files);
-            }
-          })
-          .then(() => communicate.sendMessage(messageId, socket, {remove: true}))
+          .then(() => communicate.removeMessage(messageId))
           .catch((error) => console.warn(error.message));
       });
 
