@@ -29,16 +29,20 @@ class ServerCommunication {
     return this.socket.broadcast.emit.bind(this.socket);
   }
 
-  get toSender() {
+  get toOwner() {
     return this.socket.emit.bind(this.socket);
+  }
+
+  toSender(socket) {
+    return socket.emit.bind(socket);
   }
 
   get toAllInRoom() {
     return this.io.in(this.socket.handshake.user.room).emit.bind(this.io);
   }
 
-  get toAllInRoomExceptSender() {
-    return this.socket.to(this.socket.handshake.user.room).emit.bind(this.socket);
+  toAllInRoomExceptSender(socket) {
+    return socket.to(socket.handshake.user.room).emit.bind(socket);
   }
 
   get usersInCurrentRoom() {
@@ -50,16 +54,18 @@ class ServerCommunication {
     return [...new Set(users)];
   }
 
-  sendPrivateMessage(id, msg) {
-    return this.io.to(id).emit(socketEvents.renderPrivateMessage, msg).bind(this.io);
+  sendPrivateMessage(socket, event, ...rest) {
+    this.io.to(socket.id).emit(event, ...rest);
   }
 
-  sendWelcomeMsg() {
-    const msg = format.formatAdminMessage({text: 'Welcome to the Chat!'});
+  sendWelcomeMsg(socket) {
+    if (this.isOwner(socket)) {
+      const msg = format.formatAdminMessage({text: 'Welcome to the Chat!'});
 
-    this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
-      this.toSender(socketEvents.renderAdminMessage, html);
-    });
+      this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
+        this.toOwner(socketEvents.renderMessage, html);
+      });
+    }
   }
 
   sendHistory(history) {
@@ -67,24 +73,24 @@ class ServerCommunication {
       const {date, data} = item;
 
       this.server.render(config.templates.history, {messages: data, date}, (err, html) => {
-        this.toSender(socketEvents.renderMessageHistory, html);
+        this.toOwner(socketEvents.renderMessageHistory, html);
       });
     });
   }
 
-  informUserConnected() {
-    const msg = format.formatAdminMessage({text: `${this.socket.handshake.user.username} has joined the chat`});
+  informUserConnected(socket) {
+    const msg = format.formatAdminMessage({text: `${socket.handshake.user.username} has joined the chat`});
 
     this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
-      this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
+      this.toAllInRoomExceptSender(socket)(socketEvents.renderMessage, html);
     });
   }
 
-  informUserDisconnected() {
-    const msg = format.formatAdminMessage({text: `${this.socket.handshake.user.username} has left the chat`});
+  informUserDisconnected(socket) {
+    const msg = format.formatAdminMessage({text: `${socket.handshake.user.username} has left the chat`});
 
     this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
-      this.toAllInRoomExceptSender(socketEvents.renderAdminMessage, html);
+      this.toAllInRoomExceptSender(socket)(socketEvents.renderMessage, html);
     });
   }
 
@@ -106,22 +112,33 @@ class ServerCommunication {
     }
   }
 
-  sendMessage(msg, socket, {add, update, remove}) {
-    const isOwner = this.isOwner(socket) && msg.username === socket.handshake.user.username;
-    const event = (add && socketEvents.renderMessage)
-      || (update && socketEvents.editMessageSuccess);
+  removeMessage(messageId) {
+    this.toAllInRoom(socketEvents.deleteMessageSuccess, messageId);
+  }
 
-    if (remove) {
-      this.toSender(socketEvents.deleteMessageSuccess, msg);
-      this.toAllInRoomExceptSender(socketEvents.deleteMessageSuccess, msg);
+  reactOnMessage(msg) {
+    this.server.render(config.templates.body, {item: msg}, (err, html) => {
+      this.toAllInRoom(socketEvents.reactOnMessageSuccess, html, msg._id);
+    });
+  }
+
+  sendMessage(msg, socket, {add, update}) {
+    if (add) {
+      this.server.render(config.templates.history, {messages: [{...msg, role: 'peer'}]}, (err, html) => {
+        this.toAllInRoomExceptSender(socket)(socketEvents.renderMessage, html);
+      });
+      this.server.render(config.templates.history, {messages: [{...msg, role: 'owner'}]}, (err, html) => {
+        this.toSender(socket)(socketEvents.renderMessage, html);
+      });
+
+      return;
     }
 
-    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'peer' : 'owner'}]}, (err, html) => {
-      this.toAllInRoomExceptSender(event, html);
-    });
-    this.server.render(config.templates.history, {messages: [{...msg, role: isOwner ? 'owner' : 'peer'}]}, (err, html) => {
-      this.toSender(event, html);
-    });
+    if (update) {
+      this.server.render(config.templates.update, {item: msg}, (err, html) => {
+        this.toAllInRoom(socketEvents.editMessageSuccess, html, msg._id);
+      });
+    }
   }
 }
 

@@ -3,22 +3,7 @@ if date
 for item in messages || []
   div(id=item._id class=`chat-message-wrapper chat-message-wrapper_${item.role}`)
     .chat-message
-      .chat-message-header
-        .chat-message-user-info= item.username
-        - const updated = item.updateTime && new Date(item.updateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        - const created = new Date(item.createTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        .chat-message-date(title=updated ? updated : created)= updated ? `Edited ${updated}` : created
-      .chat-message-body
-        if (item.files && item.files.length)
-          for fileAddr in item.files
-            .chat-message-uploaded-img
-              img(src=`/${fileAddr}`)
-        if (item.files && item.files.length && item.text)
-          br
-        if item.text
-          .chat-message-text= item.text
-        if (item.emoji && item.emoji.length)
-          .chat-message-emoji= item.emoji.join('')
+      include messageUpdate.pug
       .chat-message-footer
         if item.role === 'owner'
           .chat-message-actions
@@ -26,7 +11,7 @@ for item in messages || []
               i.fa.fa-pencil-square-o
             button.icon-btn.delete-message-btn(type='button', onclick="deleteMessage('" + item._id + "')")
               i.fa.fa-trash-o
-        if item.role !== 'owner'
+        if item.role !== 'owner' && item.role !== 'admin'
           .chat-message-actions
             button.icon-btn.emoji-picker-btn(type='button', onclick="toggleEmojiPicker('" + item._id + "')")
               i.fa.fa-smile-o

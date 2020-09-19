@@ -46,8 +46,8 @@ module.exports = (app, sessionStore, io) => {
 
       if (!onceConnected.find((id) => id === user.userId)) {
         onceConnected.push(user.userId);
-        communicate.sendWelcomeMsg();
-        communicate.informUserConnected();
+        communicate.sendWelcomeMsg(socket);
+        communicate.informUserConnected(socket);
       }
 
       communicate.sendUsersList();
@@ -85,23 +85,22 @@ module.exports = (app, sessionStore, io) => {
           .catch((error) => console.warn(error.message));
       });
 
-      socket.on(socketEvents.deleteMessage, async (messageId) => {
-        const prevMessage = await db.chat.getMessage(messageId);
+      socket.on(socketEvents.reactOnMessage, async (messageId, {emoji}) => {
+        db.chat.addMessageReaction(messageId, emoji)
+          .then((newMessage) => { communicate.reactOnMessage(newMessage); })
+          .catch((error) => console.warn(error.message));
+      });
 
+      socket.on(socketEvents.deleteMessage, async (messageId) => {
         db.chat.deleteMessage(messageId)
-          .then(() => {
-            if (prevMessage) {
-              format.removeFileSync(prevMessage.files);
-            }
-          })
-          .then(() => communicate.sendMessage(messageId, socket, {remove: true}))
+          .then(() => communicate.removeMessage(messageId))
           .catch((error) => console.warn(error.message));
       });
 
       socket.on(socketEvents.sendInvite, (receivers, cb) => {
         sendInvite({from: user.username, to: receivers, link: socket.handshake.headers.origin})
           .then(cb)
-          .catch((error) => communicate.toSender(socketEvents.sendInviteResult, error.message));
+          .catch((error) => communicate.toOwner(socketEvents.sendInviteResult, error.message));
       });
 
       socket.on(socketEvents.disconnect, async (data) => {
@@ -112,7 +111,7 @@ module.exports = (app, sessionStore, io) => {
             logger.info(`User ${user.username} disconnected ${data}`);
             onceConnected = onceConnected.filter((id) => id !== user.userId);
             communicate.sendUsersList();
-            communicate.informUserDisconnected();
+            communicate.informUserDisconnected(socket);
             communicate.removeSocket();
 
             app.locals.username = null;

@@ -1,0 +1,7 @@
+.chat-message-update-content
+  .chat-message-header
+    .chat-message-user-info= item.username
+    - const updated = item.updateTime && new Date(item.updateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    - const created = new Date(item.createTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    .chat-message-date(title=updated ? updated : created)= updated ? `Changed ${updated}` : created
+  include messageBody.pug
