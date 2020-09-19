@@ -1,0 +1,11 @@
+.chat-message-body
+    if (item.files && item.files.length)
+        for fileAddr in item.files
+            .chat-message-uploaded-img
+                img(src=`/${fileAddr}`)
+    if (item.files && item.files.length && item.text)
+        br
+    if item.text
+        .chat-message-text= item.text
+    if (item.emoji && item.emoji.length)
+        .chat-message-emoji= item.emoji.join('')

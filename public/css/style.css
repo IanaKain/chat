@@ -660,6 +660,7 @@ select {
 }
 .chat-message-header {
   display: flex;
+  align-items: flex-end;
   margin-bottom: 4px;
   font-size: 14px;
 }
@@ -718,6 +719,20 @@ select {
   background: transparent;
   border: none;
   cursor: pointer;
+}
+.chat-message-wrapper_admin {
+  justify-content: center;
+}
+.chat-message-wrapper_admin .chat-message {
+  max-width: 100%;
+}
+.chat-message-wrapper_admin .chat-message-header {
+  margin-bottom: 2px;
+  justify-content: center;
+}
+.chat-message-wrapper_admin .chat-message-body {
+  padding: 0 10px 6px;
+  font-size: 14px;
 }
 .chat-message-wrapper_peer .chat-message {
   margin: 10px auto 0 8px;

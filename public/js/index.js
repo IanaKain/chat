@@ -23,7 +23,7 @@ const picker = new EmojiButton();
 
 picker.on('emoji', (emoji) => {
   if (messageIdInEditMode) {
-    socket.emit(socketEvents.editMessage, messageIdInEditMode, {emoji});
+    socket.emit(socketEvents.reactOnMessage, messageIdInEditMode, {emoji});
   } else {
     document.querySelector('textarea').value += emoji;
   }
@@ -165,7 +165,7 @@ socket
       editModeFlag.remove();
     }
 
-    messageToEdit.outerHTML = html;
+    messageToEdit.querySelector('.chat-message-update-content').outerHTML = html;
     textInput.value = '';
     textInput.focus();
     messageIdInEditMode = null;
@@ -173,6 +173,12 @@ socket
     if (editBtn) {
       editBtn.disabled = false;
     }
+  })
+  .on(socketEvents.reactOnMessageSuccess, (html, messageId) => {
+    const messageToEdit = document.getElementById(messageIdInEditMode || messageId);
+
+    messageToEdit.querySelector('.chat-message-body').outerHTML = html;
+    messageIdInEditMode = null;
   });
 
 window.onload = function () {

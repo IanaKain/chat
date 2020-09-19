@@ -21,6 +21,8 @@
     "chat": "chat",
     "users": "users",
     "message": "message",
+    "body": "messageBody",
+    "update": "messageUpdate",
     "history": "historyMessage",
     "typing": "typingMessage"
   },

@@ -112,6 +112,31 @@ class Chat {
     }
   }
 
+  async addMessageReaction(messageId, emoji) {
+    const prevMessage = await this.getMessage(messageId);
+    const collection = await client.db().collection(this.collectionName);
+    const updatedEmoji = {emoji: [...(prevMessage.emoji || []), emoji]};
+
+    try {
+      const result = await collection.findOneAndUpdate(
+        {_id: ObjectID(messageId)},
+        {$set: {...updatedEmoji}},
+        {returnOriginal: false}
+      );
+
+      if (!result.ok) {
+        throw new Error(messageId);
+      }
+
+      logger.info(`Message updated in db. ${messageId}`);
+
+      return result.value;
+    } catch (error) {
+      logger.warn(`Cannot update message. ${error.message}`);
+      throw error;
+    }
+  }
+
   async deleteMessage(messageId) {
     const collection = await client.db().collection(this.collectionName);
 
