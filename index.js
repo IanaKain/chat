@@ -11,6 +11,7 @@ const MongoStore = require('connect-mongo')(session);
 const dotenv = require('dotenv').config();
 const routes = require('./routes');
 const logger = require('./utils/logger')(module);
+const db = require('./db/index').collections();
 
 if (dotenv.error) { throw dotenv.error; }
 
@@ -51,9 +52,25 @@ app.use(session({
   store: sessionStore,
 }));
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
+  const userName = req.session && req.session.user
+    ? req.session.user.username
+    : req.body.username;
+
+  const user = await db.users.findUser(userName);
+
+  if (user) {
+    app.locals.username = user.username;
+    app.locals.avatar = user.avatar;
+    app.locals.room = user.room;
+    next();
+
+    return;
+  }
+
   if (req.session && req.session.user) {
     app.locals.username = req.session.user.username;
+    app.locals.avatar = req.session.user.avatar;
     app.locals.room = req.session.user.room;
     next();
   } else if (!app.locals.username && req.body.username) {

@@ -15,6 +15,17 @@ const disconnect = () => {
   window.location.href = '/logout';
 };
 
+const getStatus = () => localStorage.getItem('status') || 'online';
+
+const changeStatus = (status) => {
+  const userData = document.querySelector('.header__user-data');
+  const statusEl = document.querySelector('.user-data__status .status');
+
+  localStorage.setItem('status', status);
+  statusEl.innerHTML = status;
+  userData.className = `header__user-data ${status}`;
+};
+
 const deleteMessage = (messageId) => {
   socket.emit(socketEvents.deleteMessage, messageId);
 };
@@ -42,6 +53,16 @@ function toggleEmojiPicker(messageId) {
   picker.pickerVisible ? picker.hidePicker() : picker.showPicker();
 }
 
+function uploadAvatarImg({target}) {
+  if (target.files && target.files.length) {
+    const processedFile = toBase64(target.files[0]);
+
+    processedFile
+      .then(({base64}) => socket.emit(socketEvents.saveFile, base64))
+      .catch((error) => console.log('Could not save file', error));
+  }
+}
+
 function addFilesToPreviewList({target}) {
   addFiles(target.files);
 }
@@ -60,6 +81,8 @@ function removeFileFromPreviewList({target}) {
 function postMessage(message) {
   const textInput = document.getElementById('message');
   const files = processedFiles.map((file) => file.base64);
+
+  if (!message && !files.length) { return; }
 
   messageIdInEditMode
     ? socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files})
@@ -179,18 +202,28 @@ socket
 
     messageToEdit.querySelector('.chat-message-body').outerHTML = html;
     messageIdInEditMode = null;
+  })
+  .on(socketEvents.saveFileSuccess, (fileAddr) => {
+    const avatar = document.querySelector('.user-data__photo-img');
+
+    avatar.src = null;
+    avatar.src = `../${fileAddr}`;
   });
 
 window.onload = function () {
-  const [chatForm, textInput, inviteForm, uploadFileContainer, imagePreview, emojiPicker] = getElementsBySelectors(
-    '#chat-form', '#message', '#chat-invite-form', '#upload-file-container', '#images-list', '#emoji-picker'
-  );
-  const inputFile = uploadFileContainer.querySelector('input[type="file"]');
+  const [chatForm, textInput, inviteForm, uploadFileWrap, imgPreview, emojiPicker, uploadAvatar] =
+    getElementsBySelectors(
+      '#chat-form', '#message', '#chat-invite-form', '#upload-file-container', '#images-list', '#emoji-picker',
+      '#upload-avatar-container'
+    );
+  const inputFile = uploadFileWrap.querySelector('input[type="file"]');
+  const avatarFile = uploadAvatar.querySelector('input[type="file"]');
 
   document.addEventListener('keydown', onEnterPress);
   emojiPicker.addEventListener('click', toggleEmojiPicker);
   inputFile.addEventListener('change', addFilesToPreviewList);
-  imagePreview.addEventListener('click', removeFileFromPreviewList);
+  avatarFile.addEventListener('change', uploadAvatarImg);
+  imgPreview.addEventListener('click', removeFileFromPreviewList);
   textInput.addEventListener('keydown', onKeyDown());
   textInput.addEventListener('keyup', autoGrow);
   inviteForm.addEventListener('submit', sendInvite);
@@ -198,4 +231,5 @@ window.onload = function () {
     event.preventDefault();
     postMessage(event.target.elements.message.value);
   });
+  changeStatus(getStatus());
 };

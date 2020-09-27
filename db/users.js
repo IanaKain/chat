@@ -25,6 +25,24 @@ class Users {
     }
   }
 
+  async updateUser(data) {
+    const collection = client.db().collection(this.collectionName);
+    const {userId, ...updateData} = data;
+
+    try {
+      const result = await collection.findOneAndUpdate(
+        {_id: ObjectID(userId)},
+        {$set: {...updateData}},
+        {returnOriginal: false}
+      );
+
+      return result;
+    } catch (error) {
+      logger.warn(`Cannot update user. ${error.message}`);
+      throw new ServerError(error, 'Cannot update user');
+    }
+  }
+
   async findUser(username) {
     const collection = client.db().collection(this.collectionName);
 
@@ -37,6 +55,7 @@ class Users {
           username: user.username,
           password: user.password,
           room: user.room,
+          avatar: user.avatar,
         })
         : user;
     } catch (error) {

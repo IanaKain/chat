@@ -10,6 +10,9 @@ const userSchema = {
       bsonType: 'string',
       description: 'password is required',
     },
+    avatar: {
+      bsonType: 'string',
+    },
     room: {
       bsonType: 'string',
     },

@@ -1,0 +1,13 @@
+.user-data__photo
+    img.user-data__photo-img(src= `../${avatar}`)
+    form#upload-avatar
+        #upload-avatar-container
+            label.custom-file-container__custom-file-label(for='avatar')
+                input(
+                    type='file'
+                    id='avatar'
+                    name='avatar'
+                    accept='image/*'
+                    class='custom-file-container__custom-file-input'
+                )
+                input(type='hidden')
