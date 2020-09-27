@@ -20,6 +20,7 @@
     "refreshPreviewPanel": "readonly",
     "deleteFileByIndex": "readonly",
     "addFiles": "readonly",
+    "toBase64": "readonly",
     "editMessage": "readonly",
     "messageIdInEditMode": "writeable",
     "autoGrow": "readonly"

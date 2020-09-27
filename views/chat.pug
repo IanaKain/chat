@@ -31,8 +31,12 @@ block content
                 )
         .chat-right-side
           .chat-header
-            .header__user-data= username
-            .status
+            .header__user-data
+              .user-data__name= username
+              include avatar.pug
+              .user-data__status
+                .status
+                include statuses.pug
             .header__chat-leave-btn
               button#leave-chat-btn(type='button', onclick='disconnect()') Leave
                 i.fa.fa-sign-out
@@ -59,7 +63,7 @@ block content
                   i#emoji-picker.fa.fa-smile-o
                   form#upload-file
                     #upload-file-container
-                      label.attach-file.custom-file-container__custom-file(for='file')
+                      label.custom-file-container__custom-file-label(for='file')
                         i.fa.fa-paperclip
                         input(
                           type='file'
@@ -67,7 +71,7 @@ block content
                           name='file'
                           accept='image/*'
                           multiple
-                          class='custom-file-container__custom-file__custom-file-input'
+                          class='custom-file-container__custom-file-input'
                         )
                         input(type='hidden' name='MAX_FILE_SIZE' value='10485760')
                   button#send-message-btn(type='submit')

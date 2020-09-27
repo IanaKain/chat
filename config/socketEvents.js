@@ -17,4 +17,6 @@ const socketEvents = {
   renderUsers: 'html:users',
   renderMessageHistory: 'html:message',
   renderMessage: 'html:message:add',
+  saveFile: 'file:save',
+  saveFileSuccess: 'file:save:success',
 };

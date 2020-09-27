@@ -42,25 +42,10 @@ function processFile(initialFile) {
   }
 
   if (!initialFile.base64) {
-    return new Promise((res) => {
-      const result = {file: null, base64: '', preview: ''};
-      const targetFile = initialFile;
-      const reader = new FileReader();
+    const processedFile = toBase64(initialFile);
 
-      reader.onload = ({target}) => {
-        result.file = initialFile;
-        result.preview = target.result;
-        result.base64 = target.result;
-        processedFiles.push(result);
-
-        res(result);
-      };
-
-      reader.readAsDataURL(targetFile);
-    })
-      .then((processedFile) => {
-        renderFilePreview(processedFile);
-      })
+    return processedFile
+      .then(renderFilePreview)
       .catch((error) => console.error('Error while file processing. ', error));
   }
 }
@@ -92,4 +77,25 @@ function deleteFileByIndex(index) {
   if (!processedFiles.length) {
     clearPreviewPanel();
   }
+}
+
+function toBase64(initialFile) {
+  return new Promise((res) => {
+    const result = {file: null, base64: '', preview: ''};
+    const targetFile = initialFile;
+    const reader = new FileReader();
+
+    reader.onload = ({target}) => {
+      result.file = initialFile;
+      result.preview = target.result;
+      result.base64 = target.result;
+      processedFiles.push(result);
+
+      res(result);
+    };
+
+    reader.readAsDataURL(targetFile);
+  })
+    .then((processedFile) => processedFile)
+    .catch((error) => console.error('Error while file processing. ', error));
 }

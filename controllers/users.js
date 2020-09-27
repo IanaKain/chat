@@ -32,7 +32,11 @@ class Users {
         const salt = await bcrypt.genSalt(10);
         const securePassword = await bcrypt.hash(req.body.password, salt);
 
-        req.session.user = await db.users.addUser({...req.body, password: securePassword});
+        req.session.user = await db.users.addUser({
+          ...req.body,
+          password: securePassword,
+          avatar: 'images/avatar.png',
+        });
         res.redirect(config.routes.chat);
       }
     } catch (error) {

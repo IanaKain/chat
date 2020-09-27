@@ -79,8 +79,21 @@ exports.saveFilesReturnPathSync = (files) => {
   return result;
 };
 
-exports.removeFileSync = (files) => {
+exports.findFileSync = (folder) =>
+  fs.readdirSync(folder ? `${process.cwd()}/public/${folder}` : `${process.cwd()}/public`);
+
+exports.saveFileSync = (file) => {
+  const [encoded, ext] = getEncodedWithExt(file);
+  const fileAddr = `images/${Date.now()}-avatar.${ext}`;
+  const filePath = `public/${fileAddr}`;
+
+  fs.writeFileSync(filePath, encoded, 'base64');
+
+  return fileAddr;
+};
+
+exports.removeFileSync = (files, folder) => {
   files.forEach((fileAddr) => {
-    fs.unlinkSync(`public/${fileAddr}`);
+    fs.unlinkSync(folder ? `public/${folder}/${fileAddr}` : `public/${fileAddr}`);
   });
 };

@@ -103,6 +103,19 @@ module.exports = (app, sessionStore, io) => {
           .catch((error) => communicate.toOwner(socketEvents.sendInviteResult, error.message));
       });
 
+      socket.on(socketEvents.saveFile, async (file) => {
+        const filesToRemove = format.findFileSync('images').filter((img) => {
+          return img !== 'avatar.png' && img.includes('avatar');
+        });
+
+        format.removeFileSync(filesToRemove, 'images');
+
+        const newFileAddr = format.saveFileSync(file);
+
+        await db.users.updateUser({userId: socket.handshake.user.userId, avatar: newFileAddr});
+        communicate.toOwner(socketEvents.saveFileSuccess, newFileAddr);
+      });
+
       socket.on(socketEvents.disconnect, async (data) => {
         setTimeout(() => {
           const isDisconnected = Boolean(!communicate.usersInCurrentRoom.includes(user.username));

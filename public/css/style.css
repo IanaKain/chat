@@ -62,7 +62,7 @@ p {
   line-height: 34px;
   font-size: 20px;
 }
-form {
+form#upload-file {
   margin: 34px 0 14px;
   background: #32465a;
 }
@@ -172,21 +172,110 @@ select {
   justify-content: space-between;
   font-family: sans-serif;
 }
+.header__user-data.online .user-data__photo {
+  border: 2px solid #00eb00;
+}
+.header__user-data.online .user-data__status {
+  color: #00eb00;
+}
+.header__user-data.offline .user-data__photo {
+  border: 2px solid #f00;
+}
+.header__user-data.offline .user-data__status {
+  color: #f00;
+}
+.header__user-data.away .user-data__photo {
+  border: 2px solid #ffc200;
+}
+.header__user-data.away .user-data__status {
+  color: #ffc200;
+}
 .header__user-data {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: 200px;
+  height: 100%;
   position: relative;
   padding-left: 30px;
   font-weight: bold;
 }
-.header__user-data .status {
+.header__user-data .user-data__photo {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  margin: 2px 0 0 10px;
+  border: 2px solid #00eb00;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.header__user-data .user-data__photo-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.header__user-data form#upload-avatar {
   position: absolute;
-  width: 12px;
-  height: 12px;
-  background: #27ae60;
-  left: 12px;
-  margin-left: 0;
-  top: 50%;
-  margin-top: -10px;
-  border-radius: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.header__user-data form#upload-avatar #upload-avatar-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+.header__user-data form#upload-avatar .custom-file-container__custom-file-label {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.header__user-data .user-data__status {
+  position: relative;
+  align-self: flex-start;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: normal;
+  margin: 10px 0 0 6px;
+}
+.header__statuses {
+  width: 100px;
+  position: absolute;
+  left: 0;
+  bottom: -110px;
+  padding-bottom: 12px;
+  border-radius: 12px;
+  background-color: #32465a;
+  z-index: 2;
+  visibility: hidden;
+  color: #fff;
+}
+.header__statuses ul {
+  padding: 0;
+  display: block;
+  font-size: 14px;
+  list-style: none;
+  margin: 0 auto;
+}
+.header__statuses li {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  margin: 0 14px;
+  padding: 8px 0 8px;
+  border-bottom: 1px solid #32465a;
+  cursor: pointer;
+}
+.header__statuses li i {
+  margin-right: 6px;
+  cursor: pointer;
+}
+.header__statuses li:hover {
+  border-bottom: 1px solid #fff;
+}
+.user-data__status:hover .header__statuses {
+  visibility: visible;
 }
 .chat-header__room-name {
   width: 80%;
@@ -567,7 +656,7 @@ select {
   color: #32465a;
   font-size: 22px;
 }
-#chat-form .attach-file {
+#chat-form .custom-file-container__custom-file-label {
   position: relative;
   height: 100%;
   margin: 0;
@@ -577,7 +666,7 @@ select {
   align-items: center;
   cursor: pointer;
 }
-#chat-form .attach-file.active::after {
+#chat-form .custom-file-container__custom-file-label.active::after {
   position: absolute;
   top: -3px;
   right: -8px;
@@ -591,7 +680,7 @@ select {
   background: #228b22;
   border-radius: 50%;
 }
-#chat-form #file {
+.custom-file-container__custom-file-input {
   display: none;
 }
 .message__user-img img {
@@ -676,10 +765,11 @@ select {
 }
 .chat-message-user-info {
   font-weight: bold;
-  margin: 0 10px 0 12px;
+  margin: 0 6px 0 6px;
 }
 .chat-message-body {
-  min-width: 60px;
+  min-width: 50px;
+  width: fit-content;
   padding: 8px 12px;
   border-radius: 16px;
 }
@@ -687,7 +777,7 @@ select {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  padding-top: 4px;
+  margin-top: 6px;
   line-height: 10px;
 }
 .chat-message-uploaded-img img {
@@ -739,6 +829,7 @@ select {
   margin: 2px auto 2px 8px;
 }
 .chat-message-wrapper_peer .chat-message-body {
+  margin-right: auto;
   color: #32465a;
   background: #f5f5f5;
   box-shadow: 0 0 2px 0 #32465a;
@@ -747,7 +838,11 @@ select {
 .chat-message-wrapper_owner .chat-message {
   margin: 2px 8px 2px auto;
 }
+.chat-message-wrapper_owner .chat-message-user-info {
+  margin-left: auto;
+}
 .chat-message-wrapper_owner .chat-message-body {
+  margin-left: auto;
   color: #f5f5f5;
   background: #32465a;
   box-shadow: 0 0 2px 0 #435f7a;
