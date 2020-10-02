@@ -104,11 +104,6 @@ module.exports = (app, sessionStore, io) => {
       });
 
       socket.on(socketEvents.saveFile, async (file) => {
-        const filesToRemove = format.findFileSync('images')
-          .filter((img) => img !== 'avatar.png' && img.includes(user.userId));
-
-        format.removeFileSync(filesToRemove, 'images');
-
         const newFileAddr = format.saveFileSync(file, user.userId);
 
         await db.users.updateUser({userId: user.userId, avatar: newFileAddr});
