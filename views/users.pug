@@ -1,2 +1,4 @@
 for item in users || []
-  .chat-sidebar__room-users= item
+  .chat-sidebar__room-users
+    .chat-sidebar__room-users__userstatus(class= item.status)
+    .chat-sidebar__room-users__username= item.username

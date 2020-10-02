@@ -36,6 +36,7 @@ class Users {
           ...req.body,
           password: securePassword,
           avatar: 'images/avatar.png',
+          status: 'online',
         });
         res.redirect(config.routes.chat);
       }

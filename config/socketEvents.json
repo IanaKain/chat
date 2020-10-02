@@ -17,5 +17,7 @@
   "renderMessageHistory": "html:message",
   "renderMessage": "html:message:add",
   "saveFile": "file:save",
-  "saveFileSuccess": "file:save:success"
+  "saveFileSuccess": "file:save:success",
+  "setStatus": "status:set",
+  "setStatusSuccess": "status:set:success"
 }

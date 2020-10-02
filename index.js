@@ -62,6 +62,7 @@ app.use(async (req, res, next) => {
   if (user) {
     app.locals.username = user.username;
     app.locals.avatar = user.avatar;
+    app.locals.status = user.status;
     app.locals.room = user.room;
     next();
 
@@ -71,14 +72,17 @@ app.use(async (req, res, next) => {
   if (req.session && req.session.user) {
     app.locals.username = req.session.user.username;
     app.locals.avatar = req.session.user.avatar;
+    app.locals.status = req.session.user.status;
     app.locals.room = req.session.user.room;
     next();
   } else if (!app.locals.username && req.body.username) {
     app.locals.username = req.body.username;
+    app.locals.status = 'online';
     app.locals.room = req.body.room;
     next();
   } else if (!app.locals.username) {
     app.locals.username = null;
+    app.locals.status = 'offline';
     app.locals.room = null;
     next();
   } else {

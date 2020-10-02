@@ -15,15 +15,10 @@ const disconnect = () => {
   window.location.href = '/logout';
 };
 
-const getStatus = () => localStorage.getItem('status') || 'online';
+const getStatus = () => 'online';
 
 const changeStatus = (status) => {
-  const userData = document.querySelector('.header__user-data');
-  const statusEl = document.querySelector('.user-data__status .status');
-
-  localStorage.setItem('status', status);
-  statusEl.innerHTML = status;
-  userData.className = `header__user-data ${status}`;
+  socket.emit(socketEvents.setStatus, status);
 };
 
 const deleteMessage = (messageId) => {
@@ -208,6 +203,13 @@ socket
 
     avatar.src = null;
     avatar.src = `../${fileAddr}`;
+  })
+  .on(socketEvents.setStatusSuccess, (status, username) => {
+    const userData = document.querySelector('.header__user-data');
+    const statusEl = document.querySelector('.user-data__status .status');
+
+    statusEl.innerHTML = status;
+    userData.className = `header__user-data ${status}`;
   });
 
 window.onload = function () {
@@ -231,5 +233,4 @@ window.onload = function () {
     event.preventDefault();
     postMessage(event.target.elements.message.value);
   });
-  changeStatus(getStatus());
 };
