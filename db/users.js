@@ -25,7 +25,6 @@ class Users {
   }
 
   async updateUser(data) {
-    console.log('DATA', data);
     const collection = client.db().collection(this.collectionName);
     const {userId, ...updateData} = data;
 
