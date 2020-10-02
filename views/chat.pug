@@ -31,11 +31,11 @@ block content
                 )
         .chat-right-side
           .chat-header
-            .header__user-data
+            .header__user-data(class= status)
               .user-data__name= username
               include avatar.pug
               .user-data__status
-                .status
+                .status= status
                 include statuses.pug
             .header__chat-leave-btn
               button#leave-chat-btn(type='button', onclick='disconnect()') Leave

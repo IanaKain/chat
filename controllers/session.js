@@ -35,9 +35,12 @@ class Sessions {
       const user = await this.findAndAuthorize(req.body);
 
       if (user.room !== req.body.room) {
-        await db.users.addRoomToUser(user, req.body.room);
+        await db.users.updateUser({userId: user.userId, room: req.body.room, status: 'online'});
+      } else {
+        await db.users.updateUser({userId: user.userId, status: 'online'});
       }
-      req.session.user = {...user, room: req.body.room};
+
+      req.session.user = {...user, room: req.body.room, status: 'online'};
       res.redirect(config.routes.chat);
     } catch (error) {
       const {wrongPassword, userNotFound} = constants.errors;
@@ -52,6 +55,7 @@ class Sessions {
 
   async destroy(req, res, next) {
     if (req.session) {
+      await db.users.updateUser({userId: req.session.user.userId, status: 'offline'});
       req.session.destroy((error) => {
         if (!error) {
           res.clearCookie('sid', {path: '/'});

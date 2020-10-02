@@ -13,9 +13,8 @@ class Users {
   }
 
   async addUser(user) {
-    const collection = await client.db().createCollection(this.collectionName, this.schemaValidator);
-
     try {
+      const collection = await client.db().createCollection(this.collectionName, this.schemaValidator);
       const {insertedId} = await collection.insertOne({...user});
 
       return {...user, userId: insertedId};
@@ -49,15 +48,13 @@ class Users {
     try {
       const user = await collection.findOne({username});
 
-      return user
-        ? ({
-          userId: user._id,
-          username: user.username,
-          password: user.password,
-          room: user.room,
-          avatar: user.avatar,
-        })
-        : user;
+      if (user) {
+        const {_id, ...rest} = user;
+
+        return {userId: user._id, ...rest};
+      }
+
+      return user;
     } catch (error) {
       logger.warn(`Cannot find user. ${error.message}`);
       throw new ServerError(error, 'Cannot find user');

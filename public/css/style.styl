@@ -377,7 +377,17 @@ select
     padding-left: 10px;
 
 .chat-sidebar__room-users
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   margin: 5px 0;
+
+.chat-sidebar__room-users__userstatus.online
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background-color: #00eb00;
 
 .chat-sidebar__room-users-title
   margin-bottom: 20px;

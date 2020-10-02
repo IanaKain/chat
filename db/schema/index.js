@@ -13,6 +13,9 @@ const userSchema = {
     avatar: {
       bsonType: 'string',
     },
+    status: {
+      bsonType: 'string',
+    },
     room: {
       bsonType: 'string',
     },

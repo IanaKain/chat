@@ -112,13 +112,20 @@ module.exports = (app, sessionStore, io) => {
 
         const newFileAddr = format.saveFileSync(file);
 
-        await db.users.updateUser({userId: socket.handshake.user.userId, avatar: newFileAddr});
-        communicate.toOwner(socketEvents.saveFileSuccess, newFileAddr);
+        await db.users.updateUser({userId: user.userId, avatar: newFileAddr});
+        communicate.toSender(socketEvents.saveFileSuccess, newFileAddr);
+      });
+
+      socket.on(socketEvents.setStatus, async (status) => {
+        await db.users.updateUser({userId: user.userId, status});
+        communicate.toAllInRoom(socketEvents.setStatusSuccess, status, user.username);
       });
 
       socket.on(socketEvents.disconnect, async (data) => {
         setTimeout(() => {
-          const isDisconnected = Boolean(!communicate.usersInCurrentRoom.includes(user.username));
+          const isDisconnected = Boolean(
+            !communicate.usersInCurrentRoom.find(({usename}) => usename === user.username)
+          );
 
           if (isDisconnected) {
             logger.info(`User ${user.username} disconnected ${data}`);

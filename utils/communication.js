@@ -48,10 +48,12 @@ class ServerCommunication {
   get usersInCurrentRoom() {
     const users = Object.values(this.io.connected)
       .reduce((acc, client) => client.handshake.user.room === this.socket.handshake.user.room
-        ? [...acc, client.handshake.user.username]
+        ? [...acc, {username: client.handshake.user.username, status: client.handshake.user.status}]
         : acc, []);
 
-    return [...new Set(users)];
+    console.log('users', users);
+    // return [...new Set(users)];
+    return users;
   }
 
   sendPrivateMessage(socket, event, ...rest) {
