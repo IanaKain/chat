@@ -82,9 +82,9 @@ exports.saveFilesReturnPathSync = (files) => {
 exports.findFileSync = (folder) =>
   fs.readdirSync(folder ? `${process.cwd()}/public/${folder}` : `${process.cwd()}/public`);
 
-exports.saveFileSync = (file) => {
+exports.saveFileSync = (file, prefix) => {
   const [encoded, ext] = getEncodedWithExt(file);
-  const fileAddr = `images/${Date.now()}-avatar.${ext}`;
+  const fileAddr = `images/${prefix}-avatar.${ext}`;
   const filePath = `public/${fileAddr}`;
 
   fs.writeFileSync(filePath, encoded, 'base64');
