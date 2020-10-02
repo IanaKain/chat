@@ -84,7 +84,7 @@ exports.findFileSync = (folder) =>
 
 exports.saveFileSync = (file, prefix) => {
   const [encoded, ext] = getEncodedWithExt(file);
-  const fileAddr = `images/${prefix}-avatar.${ext}`;
+  const fileAddr = `images/${prefix}-${Date.now()}-avatar.${ext}`;
   const filePath = `public/${fileAddr}`;
 
   fs.writeFileSync(filePath, encoded, 'base64');
