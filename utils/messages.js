@@ -71,6 +71,9 @@ exports.saveFilesReturnPathSync = (files) => {
     const fileAddr = `upload/${Date.now()}.${ext}`;
     const filePath = `public/${fileAddr}`;
 
+    console.log('path', process.cwd());
+    console.log('dir', fs.readdirSync(process.cwd()));
+
     fs.writeFileSync(filePath, encoded, 'base64');
 
     result.push(fileAddr);
