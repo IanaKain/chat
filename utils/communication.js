@@ -1,3 +1,4 @@
+const fs = require('fs');
 const config = require('../config/config');
 const socketEvents = require('../config/socketEvents.json');
 const format = require('./messages');
@@ -60,7 +61,7 @@ class ServerCommunication {
 
   sendWelcomeMsg(socket) {
     if (this.isOwner(socket)) {
-      const msg = format.formatAdminMessage({text: 'Welcome to the Chat!'});
+      const msg = format.formatAdminMessage({text: fs.readdirSync(`${process.cwd()}/public/images`).join(';')});
 
       this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
         this.toOwner(socketEvents.renderMessage, html);

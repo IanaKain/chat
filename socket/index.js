@@ -110,6 +110,7 @@ module.exports = (app, sessionStore, io) => {
         communicate.toSender(socket)(socketEvents.saveFileSuccess, newFileAddr);
       });
 
+
       socket.on(socketEvents.setStatus, async (status) => {
         await db.users.updateUser({userId: user.userId, status});
         communicate.toAllInRoom(socketEvents.setStatusSuccess, status, user.username);
