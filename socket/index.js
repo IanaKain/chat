@@ -107,7 +107,7 @@ module.exports = (app, sessionStore, io) => {
         const newFileAddr = format.saveFileSync(file, user.userId);
 
         await db.users.updateUser({userId: user.userId, avatar: newFileAddr});
-        communicate.toSender(socketEvents.saveFileSuccess, newFileAddr);
+        communicate.toSender(socket)(socketEvents.saveFileSuccess, newFileAddr);
       });
 
       socket.on(socketEvents.setStatus, async (status) => {
@@ -116,14 +116,15 @@ module.exports = (app, sessionStore, io) => {
       });
 
       socket.on(socketEvents.disconnect, async (data) => {
-        setTimeout(() => {
+        setTimeout(async () => {
           const isDisconnected = Boolean(
-            !communicate.usersInCurrentRoom.find(({usename}) => usename === user.username)
+            !communicate.usersInCurrentRoom.find(({username}) => username === user.username)
           );
 
           if (isDisconnected) {
             logger.info(`User ${user.username} disconnected ${data}`);
             onceConnected = onceConnected.filter((id) => id !== user.userId);
+            await db.users.updateUser({userId: user.userId, status: 'offline'});
             communicate.sendUsersList();
             communicate.informUserDisconnected(socket);
             communicate.removeSocket();
