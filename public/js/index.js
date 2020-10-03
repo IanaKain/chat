@@ -201,12 +201,7 @@ socket
   .on(socketEvents.saveFileSuccess, (fileAddr) => {
     const avatar = document.querySelector('.user-data__photo-img');
 
-    console.log('fileAddr', fileAddr);
-    console.log('avatar', avatar);
-
     avatar.src = `/${fileAddr}`;
-
-    console.log('avatar.src', avatar.src);
   })
   .on(socketEvents.setStatusSuccess, (status, username) => {
     const userData = document.querySelector('.header__user-data');
