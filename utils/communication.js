@@ -51,8 +51,6 @@ class ServerCommunication {
         ? [...acc, {username: client.handshake.user.username, status: client.handshake.user.status}]
         : acc, []);
 
-    console.log('users', users);
-    // return [...new Set(users)];
     return users;
   }
 
