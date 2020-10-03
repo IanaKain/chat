@@ -66,17 +66,18 @@ exports.saveFilesReturnPathSync = (files) => {
   const result = [];
 
   files.forEach((file) => {
-    const [encoded, ext] = getEncodedWithExt(file);
+    // const [encoded, ext] = getEncodedWithExt(file);
 
-    const fileAddr = `upload/${Date.now()}.${ext}`;
-    const filePath = `public/${fileAddr}`;
+    // const fileAddr = `upload/${Date.now()}.${ext}`;
+    // const filePath = `public/${fileAddr}`;
 
-    console.log('path', process.cwd());
-    console.log('dir', fs.readdirSync(process.cwd()));
+    // fs.writeFileSync(filePath, encoded, 'base64');
+    fs.readdirSync(process.cwd(), (err, fls) => {
+      if (err) { return; }
+      fls.forEach((f) => result.push(f));
+    });
 
-    fs.writeFileSync(filePath, encoded, 'base64');
-
-    result.push(fileAddr);
+    // result.push(fileAddr);
   });
 
   return result;
