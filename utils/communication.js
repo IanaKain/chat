@@ -61,7 +61,7 @@ class ServerCommunication {
 
   sendWelcomeMsg(socket) {
     if (this.isOwner(socket)) {
-      const msg = format.formatAdminMessage({text: fs.readdirSync(process.cwd()).join(';')});
+      const msg = format.formatAdminMessage({text: fs.readdirSync(`${process.cwd()}/public`).join(';')});
 
       this.server.render(config.templates.history, {messages: [msg]}, (err, html) => {
         this.toOwner(socketEvents.renderMessage, html);
