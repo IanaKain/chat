@@ -31,7 +31,9 @@ picker.on('emoji', (emoji) => {
   if (messageIdInEditMode) {
     socket.emit(socketEvents.reactOnMessage, messageIdInEditMode, {emoji});
   } else {
-    document.querySelector('textarea').value += emoji;
+    const chatForm = document.querySelector('#chat-form');
+
+    chatForm.querySelector('#message').value += emoji;
   }
 });
 /* eslint-enable no-unused-vars */
