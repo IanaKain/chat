@@ -75,6 +75,7 @@ function removeFileFromPreviewList({target}) {
 
 function postMessage(message) {
   const textInput = document.getElementById('message');
+  const replyToBlock = document.querySelector('#reply');
   const files = processedFiles.map((file) => file.base64);
 
   if (!message && !files.length) { return; }
@@ -83,6 +84,12 @@ function postMessage(message) {
     ? socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files})
     : socket.emit(socketEvents.sendMessage, {message, files});
 
+  if (messageIdInReplyMode) {
+    socket.emit(socketEvents.messageReply, messageIdInReplyMode, {message, files});
+    messageIdInReplyMode = null;
+  }
+
+  replyToBlock.style.display = 'none';
   textInput.value = '';
   textInput.style.height = '34px';
   clearPreviewPanel();

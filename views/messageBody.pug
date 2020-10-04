@@ -5,6 +5,8 @@
                 img(src=`/${fileAddr}`)
     if (item.files && item.files.length && item.text)
         br
+    if item.pre
+        .chat-message-pretext= item.pre
     if item.text
         .chat-message-text= item.text
     if (item.emoji && item.emoji.length)

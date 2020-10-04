@@ -9,6 +9,7 @@ const userMessage = (user) => ({
   room: user.room,
   role: null,
   text: null,
+  pre: null,
   files: [],
   updateTime: null,
 });
