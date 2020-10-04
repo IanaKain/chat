@@ -81,6 +81,10 @@ function postMessage(message) {
 
   if (!message && !files.length) { return; }
 
+  if (!messageIdInEditMode && !messageIdInReplyMode) {
+    socket.emit(socketEvents.sendMessage, {message, files});
+  }
+
   if (messageIdInEditMode) {
     socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files});
   }
@@ -89,10 +93,6 @@ function postMessage(message) {
     socket.emit(socketEvents.messageReply, messageIdInReplyMode, {message, files});
     messageIdInReplyMode = null;
     replyModeFlag && replyModeFlag.remove();
-  }
-
-  if (!messageIdInEditMode && !messageIdInReplyMode) {
-    socket.emit(socketEvents.sendMessage, {message, files});
   }
 
   replyToBlock.style.display = 'none';
@@ -194,8 +194,8 @@ socket
   })
   .on(socketEvents.editMessageSuccess, (html, messageId) => {
     const messageToEdit = document.getElementById(messageIdInEditMode || messageId);
-    const [editModeFlag, textInput, editBtn] =
-      getElementsBySelectors('#edit-mode-flag', '#message', '.edit-message-btn');
+    const [editModeFlag, textInput] = getElementsBySelectors('#edit-mode-flag', '#message', '.edit-message-btn');
+    const editBtn = messageToEdit.querySelector('.edit-message-btn');
 
     if (editModeFlag) {
       editModeFlag.remove();
