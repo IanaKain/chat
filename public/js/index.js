@@ -144,9 +144,14 @@ function sendInvite(event) {
     const div = document.createElement('div');
     const inviteConfirmation = document.getElementById('invite-confirmation');
 
+    div.classList.add('invite-confirmation-text');
     div.innerHTML = 'Your invite has been sent';
     inviteConfirmation.appendChild(div);
-    setTimeout(() => { inviteConfirmation.parentNode.removeChild(inviteConfirmation); }, 4000);
+    setTimeout(() => {
+      const inviteConfirmationText = inviteConfirmation.querySelector('.invite-confirmation-text');
+
+      inviteConfirmationText.remove();
+    }, 3000);
   });
   setTimeout(() => { email.value = ''; }, 1000);
 }
@@ -203,7 +208,7 @@ socket
 
     avatar.src = `/${fileAddr}`;
   })
-  .on(socketEvents.setStatusSuccess, (status, username) => {
+  .on(socketEvents.setStatusSuccess, (status) => {
     const userData = document.querySelector('.header__user-data');
     const statusEl = document.querySelector('.user-data__status .status');
 
