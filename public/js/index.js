@@ -76,17 +76,23 @@ function removeFileFromPreviewList({target}) {
 function postMessage(message) {
   const textInput = document.getElementById('message');
   const replyToBlock = document.querySelector('#reply');
+  const replyModeFlag = document.querySelector('#reply-mode-flag');
   const files = processedFiles.map((file) => file.base64);
 
   if (!message && !files.length) { return; }
 
-  messageIdInEditMode
-    ? socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files})
-    : socket.emit(socketEvents.sendMessage, {message, files});
+  if (messageIdInEditMode) {
+    socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files});
+  }
 
   if (messageIdInReplyMode) {
     socket.emit(socketEvents.messageReply, messageIdInReplyMode, {message, files});
     messageIdInReplyMode = null;
+    replyModeFlag && replyModeFlag.remove();
+  }
+
+  if (!messageIdInEditMode && !messageIdInReplyMode) {
+    socket.emit(socketEvents.sendMessage, {message, files});
   }
 
   replyToBlock.style.display = 'none';
