@@ -89,6 +89,19 @@ class Users {
     }
   }
 
+  async getUsersInRoom(room) {
+    const collection = client.db().collection(this.collectionName);
+
+    try {
+      const results = await collection.aggregate([{$match: {room}}]).toArray();
+
+      return results;
+    } catch (error) {
+      logger.warn(`Cannot remove user. ${error.message}`);
+      throw new ServerError(error, 'Cannot remove user');
+    }
+  }
+
   async clearCollection() {
     client.db().dropDatabase();
   }

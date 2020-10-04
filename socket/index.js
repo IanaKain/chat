@@ -50,7 +50,7 @@ module.exports = (app, sessionStore, io) => {
         communicate.informUserConnected(socket);
       }
 
-      communicate.sendUsersList();
+      await communicate.sendUsersInTheRoom(user.room);
 
       socket.on(socketEvents.typeStart, () => { communicate.toggleUserIsTyping(true, socket); });
       socket.on(socketEvents.typeEnd, () => { communicate.toggleUserIsTyping(false, socket); });
@@ -110,10 +110,11 @@ module.exports = (app, sessionStore, io) => {
         communicate.toSender(socket)(socketEvents.saveFileSuccess, newFileAddr);
       });
 
-
       socket.on(socketEvents.setStatus, async (status) => {
         await db.users.updateUser({userId: user.userId, status});
-        communicate.toAllInRoom(socketEvents.setStatusSuccess, status, user.username);
+        communicate.toSender(socket)(socketEvents.setStatusSuccess, status);
+
+        await communicate.sendUsersInTheRoom(user.room);
       });
 
       socket.on(socketEvents.disconnect, async (data) => {
@@ -126,7 +127,7 @@ module.exports = (app, sessionStore, io) => {
             logger.info(`User ${user.username} disconnected ${data}`);
             onceConnected = onceConnected.filter((id) => id !== user.userId);
             await db.users.updateUser({userId: user.userId, status: 'offline'});
-            communicate.sendUsersList();
+            await communicate.sendUsersInTheRoom(user.room);
             communicate.informUserDisconnected(socket);
             communicate.removeSocket();
 

@@ -1,6 +1,7 @@
 const config = require('../config/config');
 const socketEvents = require('../config/socketEvents.json');
 const format = require('./messages');
+const db = require('../db/index').collections();
 
 class ServerCommunication {
   constructor(app, io) {
@@ -96,6 +97,14 @@ class ServerCommunication {
 
   sendUsersList() {
     this.server.render(config.templates.users, {users: this.usersInCurrentRoom}, (err, html) => {
+      this.toAllInRoom(socketEvents.renderUsers, html);
+    });
+  }
+
+  async sendUsersInTheRoom(room) {
+    const userList = await db.users.getUsersInRoom(room);
+
+    this.server.render(config.templates.users, {users: userList}, (err, html) => {
       this.toAllInRoom(socketEvents.renderUsers, html);
     });
   }

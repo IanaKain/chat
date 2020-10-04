@@ -369,12 +369,20 @@ select {
   align-items: center;
   margin: 5px 0;
 }
-.chat-sidebar__room-users__userstatus.online {
+.chat-sidebar__room-users__userstatus {
   width: 10px;
   height: 10px;
   margin-right: 8px;
   border-radius: 50%;
+}
+.chat-sidebar__room-users__userstatus.online {
   background-color: #00eb00;
+}
+.chat-sidebar__room-users__userstatus.away {
+  background-color: #ffc200;
+}
+.chat-sidebar__room-users__userstatus.offline {
+  background-color: #f00;
 }
 .chat-sidebar__room-users-title {
   margin-bottom: 20px;
