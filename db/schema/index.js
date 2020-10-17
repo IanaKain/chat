@@ -46,6 +46,10 @@ const messageSchema = {
       bsonType: ['string', 'null'],
       description: 'user text input',
     },
+    pre: {
+      bsonType: ['string', 'null'],
+      description: 'user reply',
+    },
     imgSrc: {
       bsonType: ['string', 'null'],
       description: 'user image upload',

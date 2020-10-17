@@ -117,6 +117,17 @@ module.exports = (app, sessionStore, io) => {
         await communicate.sendUsersInTheRoom(user.room);
       });
 
+      socket.on(socketEvents.messageReply, async (messageId, {message: text, files}) => {
+        const replyOn = await db.chat.getMessage(messageId);
+
+        db.chat.addMessage({
+          ...format.formatUserMessage({pre: `Reply to ${replyOn.username}: ${replyOn.text.slice(0, 20)}...`, text}, user),
+          files: format.saveFilesReturnPathSync(files),
+        })
+          .then((message) => communicate.sendMessage(message, socket, {add: true}))
+          .catch((error) => console.warn(error.message));
+      });
+
       socket.on(socketEvents.disconnect, async (data) => {
         setTimeout(async () => {
           const isDisconnected = Boolean(

@@ -8,10 +8,12 @@ for item in messages || []
         if item.role === 'owner'
           .chat-message-actions
             button.icon-btn.edit-message-btn(type='button', onclick="editMessage('" + item._id + "')")
-              i.fa.fa-pencil-square-o
+              i.fa.fa-pencil-square-o.action-icon
             button.icon-btn.delete-message-btn(type='button', onclick="deleteMessage('" + item._id + "')")
-              i.fa.fa-trash-o
+              i.fa.fa-trash-o.action-icon
         if item.role !== 'owner' && item.role !== 'admin'
           .chat-message-actions
             button.icon-btn.emoji-picker-btn(type='button', onclick="toggleEmojiPicker('" + item._id + "')")
-              i.fa.fa-smile-o
+              i.fa.fa-smile-o.action-icon
+            button.icon-btn.reply-btn(type='button', onclick="messageReply('" + item._id + "')")
+              i.fa.fa-reply.action-icon

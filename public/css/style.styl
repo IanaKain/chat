@@ -599,30 +599,46 @@ select
 #chat-form
   position: relative;
   width: 100%;
-  //height: 100%;
   margin: 0;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
-
-
+  background: color-light-body;
 
   .form-item
     margin: 0;
     padding: 0;
     width: 100%;
-    //height: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: flex-start;
     align-items: flex-end;
     background: color-dark-base;
+    border-left: 1px solid color-dark-base;
 
     #image-clear
       position: absolute;
       right: 133px;
       bottom: 10px;
+
+    #reply
+      display: none;
+      width: 100%;
+      height: 34px;
+      margin: 0 auto;
+      padding: 4px 4px 0 14px;
+      font-size: 14px;
+      border-bottom: 1px solid color-dark-base;
+      background: #e6eaea;
+      box-sizing: border-box;
+      box-shadow: none;
+      outline: none;
+      resize: none;
+      color: color-normal-base;
+      background-size: 32px 32px;
+      background-repeat: no-repeat;
+      background-position: bottom 0 right 122px;
 
     #message
       width: 100%
@@ -730,21 +746,6 @@ select
   align-items: center;
   justify-items: center;
 
-  .delete-message-btn,
-  .edit-message-btn
-    background: transparent;
-    border: none;
-    cursor: pointer;
-
-    .fa.fa-trash-o,
-    .fa.fa-pencil-square-o
-      font-size: 18px;
-      color: color-light-base;
-
-  .edit-message-btn
-    height: 14px;
-    padding: 0;
-
 .footer__chat-message-input
   width: 96%
   display: flex
@@ -802,10 +803,6 @@ select
   .edit-message-btn[disabled]
     cursor: not-allowed;
 
-  .emoji-picker-btn
-    .fa.fa-smile-o
-      font-size: 16px;
-
 .chat-message-user-info
   font-weight bold
   margin: 0 6px 0 6px
@@ -815,6 +812,12 @@ select
   width: fit-content;
   padding: 8px 12px;
   border-radius: 16px;
+
+.chat-message-pretext
+  font-size: 12px;
+  font-style: italic;
+  margin-bottom: 2px;
+  color: #ccc;
 
 .chat-message-emoji
   display: flex;
@@ -836,6 +839,17 @@ select
 .chat-message-actions
   visibility: hidden
 
+.icon-btn
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  height: 16px;
+  padding: 0 4px;
+  outline: none;
+
+.action-icon
+  font-size: 16px;
+
 .chat-message-date
   font-size: 12px;
   font-style: italic;
@@ -844,16 +858,15 @@ select
 .edit-message-btn,
 .delete-message-btn
   font-size 16px
-  color: rgba(0,0,0,.7)
-  &::hover {
-    color: rgba(0,0,0,.1)
-  }
-
 
 .icon-btn
   background: transparent;
   border: none;
   cursor: pointer;
+  color: color-dark-content;
+
+  &:hover
+    color: color-dark-base;
 
 .chat-message-wrapper_admin
   justify-content: center;
@@ -1017,3 +1030,11 @@ border-color = darken(grey, 20%);
     cursor: pointer;
   }
 }
+
+#reply-mode-flag
+  width: 34px;
+  display: flex;
+
+  .fa.fa-reply
+    padding-top: 10px;
+    padding-left: 8px;

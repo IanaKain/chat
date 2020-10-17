@@ -31,7 +31,9 @@ picker.on('emoji', (emoji) => {
   if (messageIdInEditMode) {
     socket.emit(socketEvents.reactOnMessage, messageIdInEditMode, {emoji});
   } else {
-    document.querySelector('textarea').value += emoji;
+    const chatForm = document.querySelector('#chat-form');
+
+    chatForm.querySelector('#message').value += emoji;
   }
 });
 /* eslint-enable no-unused-vars */
@@ -75,14 +77,27 @@ function removeFileFromPreviewList({target}) {
 
 function postMessage(message) {
   const textInput = document.getElementById('message');
+  const replyToBlock = document.querySelector('#reply');
+  const replyModeFlag = document.querySelector('#reply-mode-flag');
   const files = processedFiles.map((file) => file.base64);
 
   if (!message && !files.length) { return; }
 
-  messageIdInEditMode
-    ? socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files})
-    : socket.emit(socketEvents.sendMessage, {message, files});
+  if (!messageIdInEditMode && !messageIdInReplyMode) {
+    socket.emit(socketEvents.sendMessage, {message, files});
+  }
 
+  if (messageIdInEditMode) {
+    socket.emit(socketEvents.editMessage, messageIdInEditMode, {message, files});
+  }
+
+  if (messageIdInReplyMode) {
+    socket.emit(socketEvents.messageReply, messageIdInReplyMode, {message, files});
+    messageIdInReplyMode = null;
+    replyModeFlag && replyModeFlag.remove();
+  }
+
+  replyToBlock.style.display = 'none';
   textInput.value = '';
   textInput.style.height = '34px';
   clearPreviewPanel();
@@ -181,8 +196,8 @@ socket
   })
   .on(socketEvents.editMessageSuccess, (html, messageId) => {
     const messageToEdit = document.getElementById(messageIdInEditMode || messageId);
-    const [editModeFlag, textInput, editBtn] =
-      getElementsBySelectors('#edit-mode-flag', '#message', '.edit-message-btn');
+    const [editModeFlag, textInput] = getElementsBySelectors('#edit-mode-flag', '#message', '.edit-message-btn');
+    const editBtn = messageToEdit.querySelector('.edit-message-btn');
 
     if (editModeFlag) {
       editModeFlag.remove();
