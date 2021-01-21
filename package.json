@@ -30,7 +30,7 @@
     "nodemailer": "^6.4.8",
     "path": "^0.12.7",
     "pug": "^2.0.0-beta11",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.0",
     "stylus": "^0.54.7",
     "winston": "^3.2.1"
   },
